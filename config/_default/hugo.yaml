@@ -1,0 +1,7 @@
+security:
+  http:
+    urls:
+      - "^https://cdn\\.jsdelivr\\.net/.*" # Add the URL here
+    methods:
+      - "GET"
+      - "POST"
