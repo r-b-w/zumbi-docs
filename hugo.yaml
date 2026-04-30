@@ -7,7 +7,12 @@ module:
 markup:
   goldmark:
     extensions:
+      extensions:
+        extras:
+          subscript: true
+          superscript: true
       passthrough:
         delimiters:
           block: [['\[', '\]'], ["$$", "$$"]]
           inline: [['\(', '\)']]
+        enable: true
