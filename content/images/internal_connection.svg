@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="121.27755mm"
+   height="17.30402mm"
+   viewBox="0 0 121.27755 17.30402"
+   version="1.1"
+   id="svg5"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2">
+    <marker
+       style="overflow:visible"
+       id="marker7674"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="8.75"
+       markerHeight="5"
+       viewBox="0 0 8.75 5"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path7672"
+         transform="scale(-0.5)" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow1L"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="8.75"
+       markerHeight="5"
+       viewBox="0 0 8.75 5"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="arrow1L"
+         transform="scale(-0.5)" />
+    </marker>
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-25.798729,-161.71398)">
+    <g
+       id="g7209">
+      <rect
+         style="fill:#f9f593;stroke:#00aaff;stroke-width:0.600001;stroke-opacity:1"
+         id="rect790"
+         width="31.619173"
+         height="10.303761"
+         x="28.394333"
+         y="165.17479"
+         rx="2.4373314"
+         ry="2.4248037" />
+      <text
+         xml:space="preserve"
+         style="font-style:italic;font-size:6.35px;line-height:1.25;font-family:STIX;-inkscape-font-specification:'STIX, Italic';font-variant-ligatures:none;stroke-width:0.264583"
+         x="30.278381"
+         y="171.31303"
+         id="text7034"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:STIX;-inkscape-font-specification:'STIX, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+           x="30.278381"
+           y="171.31303"
+           id="tspan7092">Seu computador</tspan></text>
+    </g>
+    <g
+       id="g7209-8"
+       transform="translate(84.396451)">
+      <rect
+         style="fill:#f9f593;stroke:#00aaff;stroke-width:0.600001;stroke-opacity:1"
+         id="rect790-9"
+         width="31.619173"
+         height="10.303761"
+         x="28.394333"
+         y="165.17479"
+         rx="2.4373314"
+         ry="2.4248037" />
+      <text
+         xml:space="preserve"
+         style="font-style:italic;font-size:6.35px;line-height:1.25;font-family:STIX;-inkscape-font-specification:'STIX, Italic';font-variant-ligatures:none;stroke-width:0.264583"
+         x="38.588409"
+         y="171.31303"
+         id="text7034-7"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:STIX;-inkscape-font-specification:'STIX, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+           x="38.588409"
+           y="171.31303"
+           id="tspan7092-3">Zumbi</tspan></text>
+    </g>
+    <path
+       style="fill:none;stroke:#e63e04;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker7674);marker-end:url(#Arrow1L)"
+       d="m 62.411325,170.32667 c 47.981635,0 47.981635,0 47.981635,0"
+       id="path7461" />
+    <g
+       id="g8215"
+       transform="translate(0.55058263,-10.854343)">
+      <rect
+         style="fill:#f9f593;stroke:none;stroke-width:0.600001;stroke-opacity:1"
+         id="rect8207"
+         width="37.360966"
+         height="4.7192793"
+         x="66.463181"
+         y="182.16418"
+         rx="2.4373314"
+         ry="2.4248037" />
+      <g
+         id="g7209-2"
+         transform="translate(44.03756,14.705454)">
+        <text
+           xml:space="preserve"
+           style="font-style:italic;font-size:6.35px;line-height:1.25;font-family:STIX;-inkscape-font-specification:'STIX, Italic';font-variant-ligatures:none;stroke-width:0.264583"
+           x="25.165829"
+           y="170.99841"
+           id="text7034-1"><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:STIX;-inkscape-font-specification:'STIX, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+             x="25.165829"
+             y="170.99841"
+             id="tspan7092-9">Rede Interna da UFPE</tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>
