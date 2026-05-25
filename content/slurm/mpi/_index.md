@@ -160,14 +160,16 @@ salloc: Granted job allocation 2655
 salloc: Nodes n01 are ready for job
 [ramiro@n01 tmp2]$
 ```
-Notem que o shell foi criado no nó n01. Poderia ter sido criado em qualquer nó do sistema.
+Notem que o shell foi criado no nó n01. Poderia ter sido criado em qualquer nó do sistema. Muita atenção: *não há garantia* que todos os processos tenham sido criado no mesmo nó! Não conte com este factoide na lógica do seu programa.
 
 Poderíamos também ter feito isto antes de compilar o programa, e neste caso, a compilação seria feita diretamente no nó alocado, sem usar o srun.
 ```console
 [ramiro@n01 tmp2]$ mpicc -o bcast bcast.c 
 [ramiro@n01 tmp2]$ 
 ```
-Se você vai fazer isto muitas vezes, é melhor alocar um pequeno sistema para compilação, já que a alocação em si sempre demora um pouco, e você sempre corre o risco de não ter processadores disponíveis na hora exata em que precisar deles.
+Uma configuração interessante é alocar para uso interativo um pequeno número de processadores, apenas para compilação  preparação de dados, mas rodar o seu programa paralelo em uma alocação separada, muito preferencialmente no modo batch, onde você reserva um grande número de processadores.
+
+Para compilação de programas MPI, é melhor alocar um shell interativo do que usar srun diretamente na linha de comando do nó de login, já que a alocação em si sempre demora um pouco, e você sempre corre o risco de não ter processadores disponíveis na hora exata em que precisar deles.
 
 Podemos executar o programa da mesma maneira,
 
