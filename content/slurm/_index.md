@@ -8,6 +8,7 @@ cascade:
 ---
 
 O princípio fundamental de operação de um cluster computacional é que você não interage diretamente com os nós computacionais, para evitar a sobre-alocação de recursos. Recursos devem ser entendidos como tudo o que o seu programa usa quando roda, como processadores, memória, GPUs e tempo de execução. Clusters usam um *gerenciador de recursos*, no caso do Zumbi, o [Slurm](https://slurm.schedmd.com/), como mediador desta interação. 
+Todos os comandos do slurm tem um help extenso. Basta digitar o nome do comando e a opção `--help`. Examinaremos nesta seção apenas o estritamente mínimo necessário para você começar a usar o cluster sem prejudicar os demais usuários.
 
 O gerenciador de recursos é responsável por alocar, entre outras coisas, o número de processadores que o seu programa paralelo precisa. Caso os recursos requisitados não estejam disponíveis no momento da submissão do job, o gerenciador de recursos coloca seu job em uma fila de espera.
 Os jobs são enfileirados por ordem de chegada, são executados assim que os recursos solicitados estiverem disponíveis. Em princípio, os jobs vão sendo executados de acordo com a ordem de submissão, mas o gerenciador pode ser configurado para "furar a fila" com um job que requisite menos recursos dos que aqueles que estão à sua frente. Por isto é recomendável fazer a requisição de recursos mais "apertada" possível, que ainda atenda às suas necessidades.
@@ -92,4 +93,6 @@ Para que um programa paralelo seja executado em um computador paralelo, cada pro
 
 Você não deve tentar forçar a alocação de processadores no mesmo nó caso isto não seja necessário, no entanto, porque é possível que o número de processos que você requisitou  não esteja livre em um único nó, mas esteja disponível em um conjunto de nós. Neste caso, o seu programa irá para a fila e ficará aguardando, mesmo havendo processadores suficientes disponíveis no sistema.
 
-Depois de toda esta elocubração abstrata, vamos examinar os  mínimos [comandos](commands) necessários para executar programas paralelos no cluster Zumbi.
+Depois de toda esta elocubração abstrata, vamos examinar os  mínimos comandos necessários para executar programas paralelos no cluster Zumbi. Vamos examinar comandos para
+  - [Examinar filas e jobs](queues)
+  - [Submeter jobs](enque)

@@ -145,4 +145,8 @@ Um job paralelo pode ser composto de várias tarefas, que podem ser distribuída
 
 Resumindo: faça todas as suas análises em `${HOME}/data` ou subdiretórios criados dentro dele.
 
+## Atenção!
+
+É **muito importante** que você tenha um backup de todas as suas coisa importantes *fora* do zumbi. Nem que seja em um pendrive que você carrega no bolso e de vez em quando passa na máquina de lavar. Os discos do storage do Zumbi são de 2012, e combinados com a qualidade da rede elétrica da UFPE, de vez em quando causam falhas catastróficas no sistema de arquivos, com **perda de dados**. Depois não diga que não avisamos.
+
 Seria interessante agora ter uma pequena noção sobre como pode ser feita a [execução de programas](/slurm) paralelos no Zumbi.

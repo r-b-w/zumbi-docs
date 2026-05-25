@@ -10,6 +10,6 @@ O cluster Zumbi é a principal ferramenta computacional do grupo [PADMEC](https:
 
 Este sistema está disponível para uso por toda a comunidade acadêmica da UFPE, e também para usuários externos, dependendo da nossa disponibilidade e do tipo de uso pretendido. Não custa perguntar.
 
-Neste site você encontra alguns artigos que podem ajudá-lo a abrir uma conta no sistema, compilar e executar programas paralelos neste sistema. 
+Neste site você encontra alguma notas que visam ajudá-lo a abrir uma conta no sistema, compilar e executar programas paralelos no Zumbi. Aconselhamos que você vá seguindo os links da aba lateral direita em sequência.
 
 Por favor entre em contato caso a sua dúvida não seja respondida aqui.
