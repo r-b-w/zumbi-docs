@@ -169,7 +169,7 @@ Poderíamos também ter feito isto antes de compilar o programa, e neste caso, a
 ```
 Uma configuração interessante é alocar para uso interativo um pequeno número de processadores, apenas para compilação  preparação de dados, mas rodar o seu programa paralelo em uma alocação separada, muito preferencialmente no modo batch, onde você reserva um grande número de processadores.
 
-Para compilação de programas MPI, é melhor alocar um shell interativo do que usar srun diretamente na linha de comando do nó de login, já que a alocação em si sempre demora um pouco, e você sempre corre o risco de não ter processadores disponíveis na hora exata em que precisar deles.
+Para compilação de programas MPI, é melhor alocar um shell interativo do que usar srun diretamente na linha de comando do nó de login, já que a alocação em si sempre demora um pouco, e você sempre corre o risco de não ter processadores disponíveis na hora exata em que precisa deles.
 
 Podemos executar o programa da mesma maneira,
 
