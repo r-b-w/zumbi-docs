@@ -115,7 +115,8 @@ Só por curiosidade mórbida, podemos ver quais bibliotecas serão usadas quando
 	libz.so.1 => /lib64/libz.so.1 (0x00007fa5517d8000)
 	liblzma.so.5 => /lib64/liblzma.so.5 (0x00007fa5517a8000)
 ```
-Vejam a quantidade de bibliotecas que este programa ridiculamente simples, que não faz praticamente nada, precisa para rodar, sendo que todas precisam trabalhar em concerto, compatíveis entre si.
+
+Vejam a quantidade de bibliotecas que este programa ridiculamente simples, que não faz praticamente nada, precisa para rodar, sendo que todas precisam trabalhar em concerto, compatíveis entre si. Não se preocupe se a lista de bibliotecas que aparecer no seu caso for diferente, seu programa pode ser sido compilado com versões diferentes de compiladores e bibliotecas.
 
 Você, em princípio, não precisa se preocupar com nada disto, se não houve uma mensagem de erro de compilação, pode seguir com a vida, estamos examinando estes detalhes por motivos didáticos.
 

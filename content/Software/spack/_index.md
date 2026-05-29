@@ -214,25 +214,124 @@ config:
 ```
 Obviamente, o nome "my-spack-software" pode ser qualquer coisa, mas lembre-se de criar este diretório na área de storage grande!
 
-Para garantir que o Spack vá usar o seu compilador e o seu MPI, primeiro certifique-se que os módulos "gnu14" "openmpi5" estejam carregados, e crie um arquivo no diretório "~/.spack" com o nome "packages.yaml", contendo 
+Você **realmente** não quer o Spack reconstrua as suas bibliotecas MPI e os seus compiladores, então temos que avisá-lo para não fazer isto.
+Crie um arquivo no diretório "~/.spack" com o nome "packages.yaml", contendo 
 
 ```yaml
 packages:
-  gcc:
-    externals:
-    - spec: gcc@14.2.0 languages:='c,c++,fortran'
-      prefix: /opt/ohpc/pub/compiler/gcc/14.2.0
-      extra_attributes:
-        compilers:
-          c: /opt/ohpc/pub/compiler/gcc/14.2.0/bin/gcc
-          cxx: /opt/ohpc/pub/compiler/gcc/14.2.0/bin/g++
-          fortran: /opt/ohpc/pub/compiler/gcc/14.2.0/bin/gfortran
   mpi:
     externals:
     - spec: openmpi@5.0.7
       prefix: /opt/ohpc/pub/mpi/openmpi5-gnu14/5.0.7
     buildable: false
 ```
+Infelizmente, este arquivo terá que ser mantido "na mão", isto é, se algum dia você quiser usar outra versão do MPI, você tem que atualizá-lo manualmente.
+
+Depois disto, verifique os módulos OpenHPC dos compiladores que você quer usar estão carregados.
+```console
+[ramiro@n01 ~]$ module list
+
+Currently Loaded Modules:
+  1) autotools   3) gnu15/15.2.0   5) ucx/1.18.0         7) openmpi5/5.0.7
+  2) prun/2.2    4) hwloc/2.12.0   6) libfabric/1.18.0   8) ohpc
+```
+
+No meu caso, como eu quero usar o GCC-15, está tudo certo. Você então digita o comando
+```console
+[ramiro@n01 ~]$ spack compiler find
+==> Added 2 new compilers to /home/ramiro/.spack/packages.yaml
+    gcc@15.2.0  gcc@11.5.0
+==> Compilers are defined in the following files:
+    /home/ramiro/.spack/packages.yaml
+```
+
+Vamos entender o que aconteceu.
+```console
+packages:
+  gcc:
+    externals:
+    - spec: gcc@15.2.0 languages:='c,c++,fortran'
+      prefix: /opt/ohpc/pub/compiler/gcc/15.2.0
+      extra_attributes:
+        compilers:
+          c: /opt/ohpc/pub/compiler/gcc/15.2.0/bin/gcc
+          cxx: /opt/ohpc/pub/compiler/gcc/15.2.0/bin/g++
+          fortran: /opt/ohpc/pub/compiler/gcc/15.2.0/bin/gfortran
+    - spec: gcc@11.5.0 languages:=c
+      prefix: /usr
+      extra_attributes:
+        compilers:
+          c: /usr/bin/gcc
+  mpi:
+    externals:
+    - spec: openmpi@5.0.7
+      prefix: /opt/ohpc/pub/mpi/openmpi5-gnu14/5.0.7
+    buildable: false
+```
+
+Notem que o Spack achou o GCC-15 instalado pelo OpenHPC, e  GCC-11, da instalação normal do sistema operacional. É muito preferível usar o GCC-15 do OpenHPC pela compatibilidade com as outras bibliotecas instaladas. Aliás, se você quiser usar uma das bibliotecas científicas instaladas pelo OpenHPC no Spack, tem que configurá-la de forma análoga ao que fizemos com o MPI, caso contrário o Spack vai construí-la a partir do código fonte. Vamos usar o Trilinos como exemplo. Vamos carregar o módulo OpenHPC,
+
+```console
+[ramiro@n01 ~]$ module load trilinos
+```
+Mas nós precisamos avisar ao Spack onde isto foi parar, então temos que achá-lo
+```console
+[ramiro@n01 ~]$ module show trilinos
+-----------------------------------------------------------------------------------------------------
+   /opt/ohpc/pub/moduledeps/gnu15-openmpi5/trilinos/16.1.0:
+-----------------------------------------------------------------------------------------------------
+whatis("Name: trilinos built with gnu15 compiler and openmpi5 MPI")
+whatis("Version: 16.1.0")
+whatis("Category: runtime library")
+whatis("Description: A collection of libraries of numerical algorithms")
+whatis("URL https://trilinos.org/")
+prepend_path{"PATH","/opt/ohpc/pub/libs/gnu15/openmpi5/trilinos/16.1.0/bin",delim=":",priority="0"}
+prepend_path{"INCLUDE","/opt/ohpc/pub/libs/gnu15/openmpi5/trilinos/16.1.0/include",delim=":",priority="0"}
+prepend_path{"LD_LIBRARY_PATH","/opt/ohpc/pub/libs/gnu15/openmpi5/trilinos/16.1.0/lib64",delim=":",priority="0"}
+setenv{"TRILINOS_DIR","/opt/ohpc/pub/libs/gnu15/openmpi5/trilinos/16.1.0"}
+setenv{"TRILINOS_BIN","/opt/ohpc/pub/libs/gnu15/openmpi5/trilinos/16.1.0/bin"}
+setenv{"TRILINOS_INC","/opt/ohpc/pub/libs/gnu15/openmpi5/trilinos/16.1.0/include"}
+setenv{"TRILINOS_LIB","/opt/ohpc/pub/libs/gnu15/openmpi5/trilinos/16.1.0/lib64"}
+depends_on("openblas")
+help([[ 
+This module loads the trilinos library built with the gnu15 compiler
+toolchain and the openmpi5 MPI stack.
+
+Version 16.1.0
+
+]])
+```
+Precisamos então editar o arquivo "~/.spack/packages.yaml", como mostrado a seguir.
+
+```yaml
+[ramiro@zumbi ~]$ cat ~/.spack/packages.yaml 
+packages:
+  gcc:
+    externals:
+    - spec: gcc@15.2.0 languages:='c,c++,fortran'
+      prefix: /opt/ohpc/pub/compiler/gcc/15.2.0
+      extra_attributes:
+        compilers:
+          c: /opt/ohpc/pub/compiler/gcc/15.2.0/bin/gcc
+          cxx: /opt/ohpc/pub/compiler/gcc/15.2.0/bin/g++
+          fortran: /opt/ohpc/pub/compiler/gcc/15.2.0/bin/gfortran
+    - spec: gcc@11.5.0 languages:=c
+      prefix: /usr
+      extra_attributes:
+        compilers:
+          c: /usr/bin/gcc
+  mpi:
+    externals:
+    - spec: openmpi@5.0.7
+      prefix: /opt/ohpc/pub/mpi/openmpi5-gnu14/5.0.7
+    buildable: false
+  trilinos:
+    externals:
+    - spec: trilinos@16.1.0
+      prefix: /opt/ohpc/pub/libs/gnu15/openmpi5/trilinos/16.1.0
+[ramiro@zumbi ~]$
+```
+Eu não *super* testei isto, então, qualquer observação construtiva é bem vinda.
 
 Não é estritamente necessário, mas você pode fazer com que a sua instalação local do Spack use pacotes já instalados no Spack do sistema, pare não ter que recompilá-los, caso existam. Basta criar um arquivo "upstreams.yaml", no mesmo diretório, com o conteúdo
 ```yaml
@@ -242,7 +341,9 @@ upstreams:
 ```
 
 ### Ambientes 
+
 Conforme dissemos no início desta seção, a boa prática do Spack é criar ambientes para cada projeto. Para que os ambientes funcionem corretamente no Spack, você precisa configurar adequadamente o seu shell, adicionando a linha a seguir ao final do seu arquivo ".bashrc". Você vai ter que sair do Zumbi e voltar para que esta modificação tenha efeito.
+
 ```bash
 . /opt/ohpc/pub/apps/spack/1.0.2/share/spack/setup-env.sh
 ```
