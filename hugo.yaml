@@ -16,3 +16,13 @@ markup:
           block: [['\[', '\]'], ["$$", "$$"]]
           inline: [['\(', '\)']]
         enable: true
+params:
+  navbar:
+    displayTitle: true
+    displayLogo: true
+    logo:
+      path: images/padmec_mini.png
+      dark: images/padmec_mini.png
+      link: /
+      width: 40
+      height: 40
