@@ -1,0 +1,22 @@
+
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://code.willmersdorf.net/zumbi-docs/slurm/queues/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>https://code.willmersdorf.net/zumbi-docs/slurm/enque/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>https://code.willmersdorf.net/zumbi-docs/slurm/mpi/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>https://code.willmersdorf.net/zumbi-docs/slurm/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>https://code.willmersdorf.net/zumbi-docs/categories/</loc>
+  </url><url>
+    <loc>https://code.willmersdorf.net/zumbi-docs/tags/</loc>
+  </url>
+</urlset>

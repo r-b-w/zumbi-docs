@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="robots" content="index, follow" />
+  <link rel="icon shortcut" href="/zumbi-docs/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/zumbi-docs/favicon.svg" type="image/svg+xml" id="favicon-svg" />
+<link rel="icon" href="/zumbi-docs/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/zumbi-docs/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/zumbi-docs/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/zumbi-docs/site.webmanifest" rel="manifest" />
+<title>Submissão de jobs – Cluster Zumbi</title>
+  <meta name="description" content="Há três modos diferentes de submissão de jobs ao cluster, dois modos interativos e um modo ‘batch’. Em todos os casos o seu job vai para uma fila, se os recursos que você solicitou estiverem disponíveis, o seu job começa a executar imediatamente, caso contrário, fica enfileirado esperando os recursos se tornarem disponíveis. O principal recurso gerenciado no Zumbi é o número de CPUs.
+Sequencial: Não há nenhuma espécie de paralelismo, você precisa apenas de uma CPU. Apesar de aparentemente não fazer muito sentido usar o cluster para jobs sequenciais, alguma característica dos nós do cluster, como memória disponível grande, pode justificar este uso. Sequencial com múltiplas instâncias: Você precisa rodar múltiplas instâncias de jobs sequenciais, tipicamente, múltiplas cópias do mesmo programa com parâmetros diferentes. Isto é conhecido como paralelismo trivial, já que os programas são independentes entre si e não necessidade de comunicação. Paralelo com memória compartilhada: O seu programa é paralelo e foi escrito com OpenMP ou alguma biblioteca de multithreading. Cada thread é um processo do sistema operacional, e é alocada a um processador, e cada processador é alocada a um único processo. Todos os processadores precisam ser alocados no mesmo nó. Veremos a seguir como garantir isto, e não é requisitando nós. Nunca faça isto. Paralelo com memória distribuída: O programa paralelo foi escrito com MPI ou algum outro mecanismo de troca de mensagens. O programam é composto por processos independente que se comunicam por troca de mensagens. Novamente, há uma alocação biunívoca entre processos e processadores, mas os processadores podem ser alocados em nós distintos, e neste caso as mensagens são trocadas pela rede Infiniband. Quando os processos são alocados no mesmo nó, a troca de mensagens é feita, em princípio, estando tudo instalado correta e compativelmente, simplesmente pelo redirecionamento de apontadores na memória,o que é muito rápido, então a alocação de processadores no mesmo é preferível, quando possível. Paralelo híbrido: É um programa que foi escrito com MPI e OpenMP ou uma biblioteca de threads. Pode ser executado em nós diferentes, desde que todos os processos que compartilham memória via OpenMP estejam alocados ao mesmo nó. Também é possível submeter ao slurm um job composto de várias instâncias de programas paralelos, com o mesmo ou diferentes modelos de computação paralela. A ideia fundamental é sempre a mesma: um processo, um processador, lembrando que definimos anteriormente que um processador corresponde a um núcleo de uma CPU." /><link rel="canonical" href="https://code.willmersdorf.net/zumbi-docs/slurm/enque/" itemprop="url" />
+
+<meta property="og:title" content="Submissão de jobs">
+<meta
+  property="og:description"
+  content="
+    
+      
+    
+  ">
+<meta
+  property="og:type"
+  content="
+    website
+  ">
+<meta property="og:url" content="https://code.willmersdorf.net/zumbi-docs/slurm/enque/">
+
+
+	<meta itemprop="name" content="Submissão de jobs">
+	<meta itemprop="description" content="Há três modos diferentes de submissão de jobs ao cluster, dois modos interativos e um modo ‘batch’. Em todos os casos o seu job vai para uma fila, se os recursos que você solicitou estiverem disponíveis, o seu job começa a executar imediatamente, caso contrário, fica enfileirado esperando os recursos se tornarem disponíveis. O principal recurso gerenciado no Zumbi é o número de CPUs.
+Sequencial: Não há nenhuma espécie de paralelismo, você precisa apenas de uma CPU. Apesar de aparentemente não fazer muito sentido usar o cluster para jobs sequenciais, alguma característica dos nós do cluster, como memória disponível grande, pode justificar este uso. Sequencial com múltiplas instâncias: Você precisa rodar múltiplas instâncias de jobs sequenciais, tipicamente, múltiplas cópias do mesmo programa com parâmetros diferentes. Isto é conhecido como paralelismo trivial, já que os programas são independentes entre si e não necessidade de comunicação. Paralelo com memória compartilhada: O seu programa é paralelo e foi escrito com OpenMP ou alguma biblioteca de multithreading. Cada thread é um processo do sistema operacional, e é alocada a um processador, e cada processador é alocada a um único processo. Todos os processadores precisam ser alocados no mesmo nó. Veremos a seguir como garantir isto, e não é requisitando nós. Nunca faça isto. Paralelo com memória distribuída: O programa paralelo foi escrito com MPI ou algum outro mecanismo de troca de mensagens. O programam é composto por processos independente que se comunicam por troca de mensagens. Novamente, há uma alocação biunívoca entre processos e processadores, mas os processadores podem ser alocados em nós distintos, e neste caso as mensagens são trocadas pela rede Infiniband. Quando os processos são alocados no mesmo nó, a troca de mensagens é feita, em princípio, estando tudo instalado correta e compativelmente, simplesmente pelo redirecionamento de apontadores na memória,o que é muito rápido, então a alocação de processadores no mesmo é preferível, quando possível. Paralelo híbrido: É um programa que foi escrito com MPI e OpenMP ou uma biblioteca de threads. Pode ser executado em nós diferentes, desde que todos os processos que compartilham memória via OpenMP estejam alocados ao mesmo nó. Também é possível submeter ao slurm um job composto de várias instâncias de programas paralelos, com o mesmo ou diferentes modelos de computação paralela. A ideia fundamental é sempre a mesma: um processo, um processador, lembrando que definimos anteriormente que um processador corresponde a um núcleo de uma CPU.">
+	<meta itemprop="datePublished" content="2026-03-24T18:43:16-03:00">
+	<meta itemprop="dateModified" content="2026-03-24T18:43:16-03:00">
+	<meta itemprop="wordCount" content="2855">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Submissão de jobs">
+	<meta name="twitter:description" content="Há três modos diferentes de submissão de jobs ao cluster, dois modos interativos e um modo ‘batch’. Em todos os casos o seu job vai para uma fila, se os recursos que você solicitou estiverem disponíveis, o seu job começa a executar imediatamente, caso contrário, fica enfileirado esperando os recursos se tornarem disponíveis. O principal recurso gerenciado no Zumbi é o número de CPUs.
+Sequencial: Não há nenhuma espécie de paralelismo, você precisa apenas de uma CPU. Apesar de aparentemente não fazer muito sentido usar o cluster para jobs sequenciais, alguma característica dos nós do cluster, como memória disponível grande, pode justificar este uso. Sequencial com múltiplas instâncias: Você precisa rodar múltiplas instâncias de jobs sequenciais, tipicamente, múltiplas cópias do mesmo programa com parâmetros diferentes. Isto é conhecido como paralelismo trivial, já que os programas são independentes entre si e não necessidade de comunicação. Paralelo com memória compartilhada: O seu programa é paralelo e foi escrito com OpenMP ou alguma biblioteca de multithreading. Cada thread é um processo do sistema operacional, e é alocada a um processador, e cada processador é alocada a um único processo. Todos os processadores precisam ser alocados no mesmo nó. Veremos a seguir como garantir isto, e não é requisitando nós. Nunca faça isto. Paralelo com memória distribuída: O programa paralelo foi escrito com MPI ou algum outro mecanismo de troca de mensagens. O programam é composto por processos independente que se comunicam por troca de mensagens. Novamente, há uma alocação biunívoca entre processos e processadores, mas os processadores podem ser alocados em nós distintos, e neste caso as mensagens são trocadas pela rede Infiniband. Quando os processos são alocados no mesmo nó, a troca de mensagens é feita, em princípio, estando tudo instalado correta e compativelmente, simplesmente pelo redirecionamento de apontadores na memória,o que é muito rápido, então a alocação de processadores no mesmo é preferível, quando possível. Paralelo híbrido: É um programa que foi escrito com MPI e OpenMP ou uma biblioteca de threads. Pode ser executado em nós diferentes, desde que todos os processos que compartilham memória via OpenMP estejam alocados ao mesmo nó. Também é possível submeter ao slurm um job composto de várias instâncias de programas paralelos, com o mesmo ou diferentes modelos de computação paralela. A ideia fundamental é sempre a mesma: um processo, um processador, lembrando que definimos anteriormente que um processador corresponde a um núcleo de uma CPU.">
+
+    <link rel="preload" href="/zumbi-docs/css/compiled/main.min.1a431501cdeb52323c920e7761f7d9e327b2bee53160196c4bd1d34a3fd9fbc9.css" as="style" integrity="sha256-GkMVAc3rUjI8kg53YffZ4yeyvuUxYBlsS9HTSj/Z&#43;8k=" />
+    <link href="/zumbi-docs/css/compiled/main.min.1a431501cdeb52323c920e7761f7d9e327b2bee53160196c4bd1d34a3fd9fbc9.css" rel="stylesheet" integrity="sha256-GkMVAc3rUjI8kg53YffZ4yeyvuUxYBlsS9HTSj/Z&#43;8k=" />
+
+  
+
+
+
+
+
+
+<script src="/zumbi-docs/js/main-head.min.94da6f95b126542222dab3a6e07ffefe1aaf63ec3ca555e827b58b80e7d3f0b7.js" integrity="sha256-lNpvlbEmVCIi2rOm4H/&#43;/hqvY&#43;w8pVXoJ7WLgOfT8Lc="></script>
+
+  
+  
+  </head>
+<body>
+    <a href="#content" class="hx:sr-only hx:focus-visible:not-sr-only hx:focus-visible:fixed hx:focus-visible:z-50 hx:focus-visible:top-2 hx:focus-visible:left-2 hx:focus-visible:bg-primary-500 hx:focus-visible:text-white hx:focus-visible:px-4 hx:focus-visible:py-2 hx:focus-visible:rounded-md hx:focus-visible:text-sm hx:focus-visible:font-medium">Skip to content</a><div class="hextra-nav-container hx:sticky hx:top-0 hx:z-20 hx:w-full hx:bg-transparent hx:print:hidden">
+  <div
+    class="hextra-nav-container-blur hx:pointer-events-none hx:absolute hx:z-[-1] hx:h-full hx:w-full hx:bg-white hx:dark:bg-dark hx:shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] hx:contrast-more:shadow-[0_0_0_1px_#000] hx:dark:shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] hx:contrast-more:dark:shadow-[0_0_0_1px_#fff]"
+  ></div>
+
+  <nav class="hextra-max-navbar-width hx:mx-auto hx:flex hx:items-center hx:justify-end hx:gap-2 hx:h-16 hx:px-6">
+    <a class="hx:flex hx:items-center hx:hover:opacity-75 hx:ltr:mr-auto hx:rtl:ml-auto" href="/">
+    <img class="hx:mr-2 hx:block hx:dark:hidden" src="/zumbi-docs/images/padmec_mini.png" alt="Logo" height="40" width="40" />
+    <img class="hx:mr-2 hx:hidden hx:dark:block" src="/zumbi-docs/images/padmec_mini.png" alt="Dark Logo" height="40" width="40" />
+    <span class="hx:mr-2 hx:font-extrabold hx:inline hx:select-none">Cluster Zumbi</span>
+</a>
+<button type="button" aria-label="Menu" aria-expanded="false" class="hextra-hamburger-menu hx:cursor-pointer hx:-mr-2 hx:rounded-sm hx:p-2 hx:active:bg-gray-400/20 hx:md:hidden hx:hextra-focus-visible-inset"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class='hx:mx-auto hx:flex hextra-max-page-width'>
+    <aside class="hextra-sidebar-container hx:flex hx:flex-col hx:print:hidden hx:md:top-16 hx:md:shrink-0 hx:md:w-64 hx:md:self-start hx:max-md:[transform:translate3d(0,-100%,0)] hx:md:sticky">
+    <div class="hx:px-4 hx:pt-4 hx:md:hidden">
+      <div class="hextra-search-wrapper hx:relative hx:md:w-64">
+  <div class="hx:relative hx:flex hx:items-center hx:text-gray-900 hx:contrast-more:text-gray-800 hx:dark:text-gray-300 hx:contrast-more:dark:text-gray-300">
+    <input
+      placeholder="Search..."
+      aria-label="Search..."
+      class="hextra-search-input hx:hextra-focus-visible hx:block hx:w-full hx:appearance-none hx:rounded-lg hx:px-3 hx:py-2 hx:transition-colors hx:text-base hx:leading-tight hx:md:text-sm hx:bg-black/[.05] hx:dark:bg-gray-50/10 hx:focus-visible:bg-white hx:dark:focus-visible:bg-dark hx:placeholder:text-gray-500 hx:dark:placeholder:text-gray-400 hx:contrast-more:border hx:contrast-more:border-current"
+      type="search"
+      autocomplete="off"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx:absolute hx:my-1.5 hx:select-none hx:ltr:right-1.5 hx:rtl:left-1.5 hx:h-5 hx:rounded-sm hx:bg-white hx:px-1.5 hx:font-mono hx:text-[10px] hx:font-medium hx:text-gray-500 hx:border hx:border-gray-200 hx:dark:border-gray-100/20 hx:dark:bg-dark/50 hx:contrast-more:border-current hx:contrast-more:text-current hx:contrast-more:dark:border-current hx:items-center hx:gap-1 hx:transition-opacity hx:pointer-events-none hx:hidden hx:sm:flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="hextra-search-results hextra-scrollbar hx:hidden hx:border hx:border-gray-200 hx:bg-white hx:text-gray-100 hx:dark:border-neutral-800 hx:dark:bg-neutral-900 hx:absolute hx:top-full hx:z-20 hx:mt-2 hx:overflow-auto hx:overscroll-contain hx:rounded-xl hx:py-2.5 hx:shadow-xl hx:max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] hx:md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx:inset-x-0 hx:ltr:md:left-auto hx:rtl:md:right-auto hx:contrast-more:border hx:contrast-more:border-gray-900 hx:contrast-more:dark:border-gray-50 hx:w-screen hx:min-h-[100px] hx:max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      aria-label="Search results"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+    <div class="hextra-search-status hx:sr-only" aria-live="polite" role="status"></div>
+  </div>
+</div>
+
+    </div><div class="hextra-scrollbar hx:overflow-y-auto hx:overflow-x-hidden hx:p-4 hx:grow hx:md:h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx:flex hx:flex-col hx:gap-1 hx:md:hidden">
+      
+      
+    </ul>
+
+    <ul class="hx:flex hx:flex-col hx:gap-1 hx:max-md:hidden">
+        
+            <li class="open"><div class="hextra-sidebar-item hx:group hx:relative hx:flex hx:items-center" data-active="false">
+    <a
+      class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:grow hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] hx:hextra-focus-visible-inset hx:ltr:pr-8 hx:rtl:pl-8 hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+      href="/zumbi-docs/slurm/"
+      
+    >
+      <span class="hx:min-w-0 [word-break:break-word]">Slurm</span>
+    </a>
+      <button type="button" class="hextra-sidebar-collapsible-button hx:absolute hx:top-1/2 hx:-translate-y-1/2 hx:ltr:right-2 hx:rtl:left-2 hx:shrink-0 hx:cursor-pointer hx:p-0 hx:text-gray-500 hx:dark:text-neutral-400 hx:group-hover:text-gray-900 hx:dark:group-hover:text-gray-50 hx:group-data-[active=true]:text-primary-800 hx:group-data-[active=true]:dark:text-primary-600 hx:hextra-focus-visible-inset" aria-label="Toggle section" aria-expanded="true"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" focusable="false" class="hx:h-[18px] hx:min-w-[18px] hx:rounded-xs hx:p-0.5 hx:hover:bg-gray-800/5 hx:dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx:origin-center hx:transition-transform hx:rtl:-rotate-180"></path></svg></button>
+  </div><div class="hextra-sidebar-children hx:ltr:pr-0 hx:rtl:pl-0 hx:overflow-hidden">
+        <ul class='hx:relative hx:flex hx:flex-col hx:gap-1 hx:before:absolute hx:before:inset-y-1 hx:before:w-px hx:before:bg-gray-200 hx:before:content-[""] hx:ltr:ml-3 hx:ltr:pl-3 hx:ltr:before:left-0 hx:rtl:mr-3 hx:rtl:pr-3 hx:rtl:before:right-0 hx:dark:before:bg-neutral-800'><li class="hx:flex hx:flex-col "><div class="hextra-sidebar-item hx:group hx:relative hx:flex hx:items-center" data-active="false">
+    <a
+      class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:grow hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] hx:hextra-focus-visible-inset hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+      href="/zumbi-docs/slurm/queues/"
+      
+    >
+      <span class="hx:min-w-0 [word-break:break-word]">Jobs e Filas</span>
+    </a>
+  </div>
+              
+            </li><li class="hx:flex hx:flex-col open"><div class="hextra-sidebar-item hx:group hx:relative hx:flex hx:items-center" data-active="true">
+    <a
+      class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:grow hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] hx:hextra-focus-visible-inset hextra-sidebar-active-item hx:bg-primary-100 hx:font-semibold hx:text-primary-800 hx:contrast-more:border hx:contrast-more:border-primary-500 hx:dark:bg-primary-400/10 hx:dark:text-primary-600 hx:contrast-more:dark:border-primary-500"
+      href="/zumbi-docs/slurm/enque/"
+      
+    >
+      <span class="hx:min-w-0 [word-break:break-word]">Submissão de jobs</span>
+    </a>
+  </div>
+              
+            </li><li class="hx:flex hx:flex-col "><div class="hextra-sidebar-item hx:group hx:relative hx:flex hx:items-center" data-active="false">
+    <a
+      class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:grow hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] hx:hextra-focus-visible-inset hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+      href="/zumbi-docs/slurm/mpi/"
+      
+    >
+      <span class="hx:min-w-0 [word-break:break-word]">Jobs MPI</span>
+    </a>
+  </div>
+              
+            </li></ul>
+      </div></li>
+        
+      </ul>
+    </div>
+  
+  
+    <div class="  hx:sticky hx:bottom-0 hx:max-h-(--menu-height) hx:bg-white hx:dark:bg-dark hx:mx-4 hx:py-4 hx:shadow-[0_-12px_16px_#fff] hx:flex hx:items-center hx:gap-2 hx:border-gray-200 hx:dark:border-neutral-800 hx:dark:shadow-[0_-12px_16px_#111] hx:contrast-more:border-neutral-400 hx:contrast-more:shadow-none hx:contrast-more:dark:shadow-none hx:border-t" data-toggle-animation="show"><div class="hx:flex hx:grow hx:flex-col"><div class="hx:flex hx:justify-items-start hx:group" data-theme="light">
+  <button
+    title="Change theme"
+    data-state="closed"
+    data-location="bottom"
+    class="hextra-theme-toggle hx:cursor-pointer hx:rounded-md hx:text-left hx:font-medium hx:h-7 hx:px-2 hx:text-xs hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:font-medium hx:text-gray-600 hx:transition-colors hx:dark:text-gray-400 hx:grow"
+    type="button"
+    aria-label="Change theme"
+    aria-expanded="false"
+    aria-haspopup="menu"
+  >
+    <div class="hx:flex hx:items-center hx:gap-2 hx:capitalize"><svg height=12 class="hx:group-data-[theme=dark]:hidden hx:group-data-[theme=system]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="hx:group-data-[theme=dark]:hidden hx:group-data-[theme=system]:hidden">Light</span><svg height=12 class="hx:group-data-[theme=light]:hidden hx:group-data-[theme=system]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="hx:group-data-[theme=light]:hidden hx:group-data-[theme=system]:hidden">Dark</span><svg height=12 class="hx:group-data-[theme=dark]:hidden hx:group-data-[theme=light]:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"  fill="currentColor">
+  <path d="M 11.996094,2 C 6.4986225,2.0192368 2.03125,6.5024993 2.03125,12 c 0,5.497501 4.4673725,9.980763 9.964844,10 H 12 12.0039 c 5.497471,-0.01924 9.964844,-4.502499 9.964844,-10 0,-5.4975007 -4.467373,-9.9807632 -9.964844,-10 H 12 Z M 12,4 c 4.417218,0.017598 7.96875,3.5822356 7.96875,8 0,4.417764 -3.551532,7.982402 -7.96875,8 z" />
+</svg>
+<span class="hx:group-data-[theme=dark]:hidden hx:group-data-[theme=light]:hidden">System</span></div>
+  </button>
+  <ul
+    class="hextra-theme-toggle-options hx:hidden hx:z-20 hx:max-h-64 hx:overflow-auto hx:rounded-lg hx:border hx:border-gray-200 hx:bg-white hx:p-1 hx:text-sm hx:shadow-lg hx:dark:border-neutral-700 hx:dark:bg-neutral-900"
+    style="position: fixed; inset: auto auto 0px 0px; margin: 0px; min-width: 100px;"
+    data-theme="light"
+    role="menu"
+  >
+    <li role="none" class="hx:flex hx:flex-col">
+      <button
+        type="button"
+        role="menuitemradio"
+        aria-checked="true"
+        tabindex="-1"
+        data-item="light"
+        class="hx:text-gray-700 hx:dark:text-gray-300 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:dark:hover:bg-neutral-800 hx:dark:hover:text-gray-100 hx:relative hx:cursor-pointer hx:whitespace-nowrap hx:rounded-sm hx:py-1.5 hx:transition-colors hx:ltr:pl-3 hx:ltr:pr-9 hx:rtl:pr-3 hx:rtl:pl-9 hx:text-left hx:w-full hx:bg-transparent hx:border-0"
+      >
+        Light
+         <span class="hx:absolute hx:inset-y-0 hx:flex hx:items-center hx:ltr:right-3 hx:rtl:left-3 hx:group-data-[theme=dark]:hidden hx:group-data-[theme=system]:hidden"><svg height=1em width=1em xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+      </button>
+    </li>
+    <li role="none" class="hx:flex hx:flex-col">
+      <button
+        type="button"
+        role="menuitemradio"
+        aria-checked="false"
+        tabindex="-1"
+        data-item="dark"
+        class="hx:text-gray-700 hx:dark:text-gray-300 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:dark:hover:bg-neutral-800 hx:dark:hover:text-gray-100 hx:relative hx:cursor-pointer hx:whitespace-nowrap hx:rounded-sm hx:py-1.5 hx:transition-colors hx:ltr:pl-3 hx:ltr:pr-9 hx:rtl:pr-3 hx:rtl:pl-9 hx:text-left hx:w-full hx:bg-transparent hx:border-0"
+      >
+        Dark
+         <span class="hx:absolute hx:inset-y-0 hx:flex hx:items-center hx:ltr:right-3 hx:rtl:left-3 hx:group-data-[theme=light]:hidden hx:group-data-[theme=system]:hidden"><svg height=1em width=1em xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+      </button>
+    </li>
+    <li role="none" class="hx:flex hx:flex-col">
+      <button
+        type="button"
+        role="menuitemradio"
+        aria-checked="false"
+        tabindex="-1"
+        data-item="system"
+        class="hx:text-gray-700 hx:dark:text-gray-300 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:dark:hover:bg-neutral-800 hx:dark:hover:text-gray-100 hx:relative hx:cursor-pointer hx:whitespace-nowrap hx:rounded-sm hx:py-1.5 hx:transition-colors hx:ltr:pl-3 hx:ltr:pr-9 hx:rtl:pr-3 hx:rtl:pl-9 hx:text-left hx:w-full hx:bg-transparent hx:border-0"
+      >
+        System
+         <span class="hx:absolute hx:inset-y-0 hx:flex hx:items-center hx:ltr:right-3 hx:rtl:left-3 hx:group-data-[theme=dark]:hidden hx:group-data-[theme=light]:hidden"><svg height=1em width=1em xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+      </button>
+    </li>
+  </ul>
+</div>
+</div></div></aside>
+    
+<nav class="hextra-toc hx:order-last hx:hidden hx:w-64 hx:shrink-0 hx:xl:block hx:print:hidden hx:px-4" aria-label="Table of contents">
+    <div class="hextra-scrollbar hx:sticky hx:top-16 hx:overflow-y-auto hx:pr-4 hx:pt-6 hx:text-sm [hyphens:auto] hx:max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] hx:ltr:-mr-4 hx:rtl:-ml-4"><p class="hx:mb-4 hx:font-semibold hx:tracking-tight">On this page</p><ul></ul><ul></ul><ul>
+      <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
+        <a class="hx:font-medium hx:inline-block hx:rounded-sm hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:wrap-break-word hx:hextra-focus-visible-inset" href="#op%c3%a7%c3%a3o---time">Opção --time
+        </a>
+      </li></ul><ul></ul><ul></ul><ul></ul>
+      <div class="hx:mt-8 hx:border-t hx:bg-white hx:pt-8 hx:shadow-[0_-12px_16px_white] hx:dark:bg-dark hx:dark:shadow-[0_-12px_16px_#111] hx:sticky hx:bottom-0 hx:flex hx:flex-col hx:items-start hx:gap-2 hx:pb-8 hx:border-gray-200 hx:dark:border-neutral-800 hx:contrast-more:border-t hx:contrast-more:border-neutral-400 hx:contrast-more:shadow-none hx:contrast-more:dark:border-neutral-400">
+        <button id="backToTop" tabindex="-1" onClick="scrollUp();" class="hx:cursor-pointer hx:transition-all hx:duration-75 hx:opacity-0 hx:text-xs hx:font-medium hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-100 hx:contrast-more:text-gray-800 hx:contrast-more:dark:text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" focusable="false" class="hx:inline hx:ltr:ml-1 hx:rtl:mr-1 hx:h-3.5 hx:w-3.5 hx:rounded-full hx:border hx:border-gray-500 hx:hover:border-gray-900 hx:dark:border-gray-400 hx:dark:hover:border-gray-100 hx:contrast-more:border-gray-800 hx:contrast-more:dark:border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx:w-full hx:break-words hx:flex hx:min-h-[calc(100vh-var(--navbar-height))] hx:min-w-0 hx:justify-center hx:pb-8 hx:pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main id="content" class="hx:w-full hx:min-w-0 hextra-max-content-width hx:px-6 hx:pt-4 hx:md:px-12">
+        <div class="hx:mt-1.5 hx:flex hx:items-center hx:gap-1 hx:overflow-hidden hx:text-sm hx:text-gray-500 hx:dark:text-gray-400 hx:contrast-more:text-current">
+        <div class="hx:whitespace-nowrap hx:transition-colors hx:min-w-[24px] hx:overflow-hidden hx:text-ellipsis hx:hover:text-gray-900 hx:dark:hover:text-gray-100">
+          <a href="/zumbi-docs/slurm/" class="hx:inline-block hx:rounded-sm hx:hextra-focus-visible-inset">Slurm</a>
+        </div><svg class="hx:w-3.5 hx:shrink-0 hx:rtl:-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx:whitespace-nowrap hx:transition-colors hx:font-medium hx:text-gray-700 hx:contrast-more:font-bold hx:contrast-more:text-current hx:dark:text-gray-100 hx:contrast-more:dark:text-current">Submissão de jobs</div>
+  </div>
+
+        <div class="content">
+          
+          <div class="hx:flex hx:flex-col hx:sm:flex-row hx:items-start hx:sm:items-center hx:sm:justify-between hx:gap-4 hx:mb-4">
+            <h1 class="hx:mb-0">Submissão de jobs</h1>
+            
+          </div>
+          
+          <p>Há três modos diferentes de submissão de jobs ao cluster, dois modos interativos e um modo &lsquo;batch&rsquo;. Em todos os casos o seu  job vai para uma fila, se os recursos que você solicitou estiverem disponíveis, o seu job começa a executar imediatamente, caso contrário, fica enfileirado esperando os recursos se tornarem disponíveis. O principal recurso gerenciado no Zumbi é o número de CPUs.</p>
+<ul>
+<li><em>Sequencial:</em> Não há nenhuma espécie de paralelismo, você precisa apenas de uma CPU. Apesar de aparentemente não fazer muito sentido usar o cluster para jobs sequenciais, alguma característica dos nós do cluster, como memória disponível grande, pode justificar este uso.</li>
+<li><em>Sequencial com múltiplas instâncias:</em> Você precisa rodar múltiplas instâncias de jobs sequenciais, tipicamente, múltiplas cópias do mesmo programa com parâmetros diferentes. Isto é conhecido como paralelismo trivial, já que os programas são independentes entre si e não necessidade de comunicação.</li>
+<li><em>Paralelo com memória compartilhada:</em>  O seu programa é paralelo e foi escrito com OpenMP  ou alguma biblioteca de multithreading. Cada thread é um processo do sistema operacional, e é alocada a um processador, e cada processador é alocada a um único processo. Todos os processadores precisam ser alocados <em>no mesmo nó</em>. Veremos a seguir como garantir isto, e não é requisitando nós. Nunca faça isto.</li>
+<li><em>Paralelo com memória distribuída:</em> O programa paralelo foi escrito com MPI ou algum outro mecanismo de troca de mensagens. O programam é composto por processos independente que se comunicam por troca de mensagens. Novamente, há uma alocação biunívoca entre processos e processadores, mas os processadores podem ser alocados em nós distintos, e neste caso as mensagens são trocadas pela rede Infiniband. Quando os processos são alocados no mesmo nó, a troca de mensagens é feita, em princípio, estando tudo instalado correta e compativelmente, simplesmente pelo redirecionamento de apontadores na memória,o que é muito rápido, então a alocação de processadores no mesmo é preferível, quando possível.</li>
+<li><em>Paralelo híbrido:</em> É um programa que foi escrito com MPI e OpenMP ou uma biblioteca de threads. Pode ser executado em nós diferentes, desde que todos os processos que compartilham memória via OpenMP estejam alocados ao mesmo nó.</li>
+</ul>
+<p>Também é possível submeter ao slurm um job composto de várias instâncias de programas paralelos, com o mesmo ou diferentes modelos de computação paralela. A ideia fundamental é sempre a mesma: um processo, um processador, lembrando que definimos anteriormente que um processador corresponde a um núcleo de uma CPU.</p>
+<p>O slurm está configurado no Zumbi baseado na seguinte convenção: um programa paralelo é composto por <em>tarefas</em>, e cada tarefa pode ser composta por um ou vários <em>processos</em>. Cada tarefa pode ser executada em nós diferentes, mas uma tarefa só pode ser executada em um único nó. Assim, existe uma mapeamento muito natural entre o tipo de programa e o objeto do slurm:</p>
+<ul>
+<li>Sequencial: uma tarefa composta por um processo;</li>
+<li>Memória compartilhada: uma tarefa composta por vários processos;</li>
+<li>Memória distribuída: várias tarefas, cada um composta por um processo;</li>
+<li>Híbrido: várias tarefas, cada uma composta por vários processos.</li>
+</ul>
+<p>Todos os comandos de submissão de jobs usam as mesmas opções para especificar para o slurm o número de tarefas e o número de processos em cada tarefa, <code>--ntasks</code> e <code>--cpus-per-task</code>, respectivamente. Há muitas outras opções para solicitar recursos de CPUs, não as use a menos que você saiba muito bem o que está fazendo.</p>
+<p>Nos exemplos abaixo vou usar os comando <code>sleep</code> do sistema operacional, que não faz nada, só espera sem consumir recursos, pelo tempo especificado e <code>hostname</code>, que imprime o nome do computador no qual o programa está rodando. É claro que no seu caso você vai especificar o programa que você quer executar.</p>
+<h1><code>srun</code></h1><p>Vamos supor que você queira rodar um programa no cluster rapidamente, só para testar alguma coisa, um programa que vai rodar por no máximo alguns minutos e não exige muita configuração. A maneira mais conveniente é usando o comando <a href="https://slurm.schedmd.com/srun.html"target="_blank" rel="noopener"><code>srun</code></a>. Por exemplo, para executar um programa sequencial,</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ srun hostname
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>[ramiro@zumbi ~]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Percebam que eu estava no nó de login, mas o comando foi executado no nó n01.</p>
+<p>Para executar um programa de memória compartilhada, com 16 threads,</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ srun --ntasks<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> --cpus-per-task<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span> hostname
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>[ramiro@zumbi ~]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Apenas um processo foi criado, mas 16 CPUs foram alocadas para o job, como podemos ver com este outro comando</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ srun --ntasks<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> --cpus-per-task<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span> /usr/bin/sleep <span style="color:#ae81ff">600</span>
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Se você digitar este comando, o seu prompt vai ficar bloqueado por 10 minutos, (você pode digitar <code>&lt;Ctrl-C&gt;</code> 2 vezes em sequência rapidamente para cancelar o job). Se eu verificar a fila, em outro terminal, temos,</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ sq
+</span></span><span style="display:flex;"><span> JOBID      USER CPUS TIME_LIMIT  TIME_LEFT ST NODELIST
+</span></span><span style="display:flex;"><span>  2596    ramiro   16    2:00:00    1:59:54  R n01
+</span></span><span style="display:flex;"><span>[ramiro@zumbi ~]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Onde vemos que foram realmente alocados 16 processadores para este job, que deve usá-las via OpenMP ou threads.</p>
+<p>Para executar um programa MPI, podemos fazer</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ srun --ntasks<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span> hostname
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>n01
+</span></span><span style="display:flex;"><span>[ramiro@zumbi ~]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Por sorte todos os processos foram alocados no mesmo nó, isto <em>não é garantido</em>.</p>
+<p>Finalmente, para executar um programa híbrido, com 5 processos MPI, cada um usando 16 thread, necessitando portanto de 80 processadores, podemos fazer</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ srun --ntasks<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span> --cpus-per-task<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span> /usr/bin/sleep <span style="color:#ae81ff">600</span>
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Novamente, o console vai ficar bloqueado por 10 minutos ou até que eu digite <code>&lt;Ctrl-C&gt;</code> duas vezes. verificando de outra janela,</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ sq
+</span></span><span style="display:flex;"><span> JOBID      USER CPUS TIME_LIMIT  TIME_LEFT ST NODELIST
+</span></span><span style="display:flex;"><span>  2598    ramiro   80    2:00:00    1:59:53  R n01
+</span></span><span style="display:flex;"><span>[ramiro@zumbi ~]$ 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Onde vemos os 80 processos alocados. Novamente todos foram alocados no nó n01, que estava completamente descarregado, mas a única garantia é que eles serão alocados em blocos de 16, que podem terminar em nós diferentes.</p>
+<h1><code>salloc</code></h1><p>O comando <a href="https://slurm.schedmd.com/salloc.html"target="_blank" rel="noopener"><code>salloc</code></a> fornece para você um shell interativo em um nó, e um conjunto de processadores, que podem estar no mesmo nó ou em nós diferentes, exatamente como para o comando <code>srun</code>. Por exemplo, se eu quiser um shell onde eu posso rodar programas de memória compartilhada com até 16 processadores, posso fazer</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ salloc --ntasks<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> --cpus-per-task<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>salloc: Granted job allocation 2599
+</span></span><span style="display:flex;"><span>salloc: Nodes n01 are ready for job
+</span></span><span style="display:flex;"><span>[ramiro@n01 ~]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Neste caso, é como se eu tivesse logado em um computador pessoal com 16 CPUs, reservadas para mim. Eu posso fazer tudo aqui, editar, compilar e executar programas. Este é basicamente o modo como eu mais trabalho no cluster na fase de desenvolvimento de um programa paralelo, quando você está compilando e rodando coisas grandes, mas que tipicamente demoram pouco. Você tem acesso direto ao seu diretório raiz, todos os seus arquivos e diretórios são acessíveis de forma transparente, apesar de acesso ser via rede Infiniband, portanto mais lento do que o acesso direto ao disco.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@n01 ~]$ ls
+</span></span><span style="display:flex;"><span>Downloads  NovelPorousFormulation_TSha.pdf  benchmarks     data  examples  man               src   tmp
+</span></span><span style="display:flex;"><span>Makefile   Work                             config.status  doc   libtool   run_pvserver.txt  test
+</span></span><span style="display:flex;"><span>[ramiro@n01 ~]$ 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Aqui fica fácil verificar o seu diretório de scratch, discutido na seção <a href="">Storage</a>.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@n01 ~]$ echo $SLURM_JOB_USER
+</span></span><span style="display:flex;"><span>ramiro
+</span></span><span style="display:flex;"><span>[ramiro@n01 ~]$ echo $SLURM_JOB_ID
+</span></span><span style="display:flex;"><span>2599
+</span></span><span style="display:flex;"><span>[ramiro@n01 ~]$ cd /scratch/$SLURM_JOB_USER.$SLURM_JOB_ID
+</span></span><span style="display:flex;"><span>[ramiro@n01 ramiro.2599]$ touch I_will_die_when_the_job_ends
+</span></span><span style="display:flex;"><span>[ramiro@n01 ramiro.2599]$ ls
+</span></span><span style="display:flex;"><span>I_will_die_when_the_job_ends
+</span></span><span style="display:flex;"><span>[ramiro@n01 ramiro.2599]$ cd 
+</span></span><span style="display:flex;"><span>[ramiro@n01 ~]$ ls /scratch/$SLURM_JOB_USER.$SLURM_JOB_ID
+</span></span><span style="display:flex;"><span>I_will_die_when_the_job_ends
+</span></span><span style="display:flex;"><span>[ramiro@n01 ~]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Este diretório scratch é removido automaticamente quando o job termina, neste caso, quando você encerra o shell, com <code>exit</code>, <code>logout</code> ou <code>&lt;Ctrl-D</code>. Este diretório está montado em um disco SSD e o acesso é muito rápido. A ideia geral é que você requisita um shell, muda para o diretório de scratch, copia os dados para lá, faz as suas coisas  e copia os resultado de volta para a sua pasta raiz, preferencialmente para o diretório /data.</p>
+<p>Atenção, se o seu job tiver alocado tarefas em nós diferentes, <em>cada nó tem um diretório de scratch independente</em>, em discos diferentes, e os processos de um nó não conseguem acessar o disco do outro nó. Por inacreditável que pareça, isto é uma boa coisa, pois permite o acesso aos discos de forma paralela, mas isto é bem complexo, e só siga este caminho se você estiver muito certo do que você está fazendo.</p>
+<p>Manipulando as opções <code>--ntasks</code> e  <code>--cpus-per-task</code> você pode adequar o seu shell ao tipo de programa paralelo que você quer rodar. Entenda que o shell que você está rodando é um programa sequencial que está rodando em um único processador em um único nó. O seu programa paralelo é quem tem a responsabilidade de recrutar os outros processos alocados para você para ao seu job.</p>
+<h1><code>sbatch</code></h1><p>Os dois métodos anteriores são interativos, você tem que ficar sentado na frente do terminal até o programa terminar. Programas paralelos podem ter tempos de execução medidos em dias ou semanas, e, em um sistema ocupado, podem demorar dias na fila, esperando recursos para executar. Claramente um esquema de submissão não interativa, <em>em batch</em>, é necessário. O slurm usa o comando <a href="https://slurm.schedmd.com/sbatch.html"target="_blank" rel="noopener"><code>sbatch</code></a> para esta finalidade.</p>
+<p>Para usar o <code>sbatch</code>, você precisa criar um arquivo de submissão, que é um arquivo de comandos do shell do sistema, &lsquo;/bin/bash&rsquo; no nosso caso. Vamos ver um exemplo simples para rodar um programa de memória compartilhada.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#SBATCH --ntasks=1</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#SBATCH --cpus-per-task=16</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#SBATCH --time=12:00:00</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;job </span>$SLURM_JOB_ID<span style="color:#e6db74"> started running at </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>/usr/bin/sleep <span style="color:#ae81ff">300</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;job </span>$SLURM_JOB_ID<span style="color:#e6db74"> started finished running  at </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Este programa só vai alocar 16 processadores em um mesmo nó, e dormir sem fazer nada por 5 minutos. Vamos salvar estes comandos em um arquivo com o nome &lsquo;batch_01.sh&rsquo;.</p>
+<p>Você usa o comando <code>sbatch</code> para submeter este job.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>ramiro@n01 tmp]$ sq
+</span></span><span style="display:flex;"><span> JOBID      USER CPUS TIME_LIMIT  TIME_LEFT ST NODELIST
+</span></span><span style="display:flex;"><span>  2599    ramiro   16    2:00:00       9:12  R n01
+</span></span><span style="display:flex;"><span>[ramiro@n01 tmp]$ sbatch batch_01.sh
+</span></span><span style="display:flex;"><span>Submitted batch job 2600
+</span></span><span style="display:flex;"><span>[ramiro@n01 tmp]$ sq
+</span></span><span style="display:flex;"><span> JOBID      USER CPUS TIME_LIMIT  TIME_LEFT ST NODELIST
+</span></span><span style="display:flex;"><span>  2600    ramiro   16   12:00:00   11:59:51  R n01
+</span></span><span style="display:flex;"><span>  2599    ramiro   16    2:00:00       8:39  R n01
+</span></span><span style="display:flex;"><span>[ramiro@n01 tmp]$ cpus
+</span></span><span style="display:flex;"><span> HOSTNAMES CPUS(A/I/O/T)
+</span></span><span style="display:flex;"><span>       n01 32/96/0/128
+</span></span><span style="display:flex;"><span>       n02 0/128/0/128
+</span></span><span style="display:flex;"><span>       n03 0/128/0/128
+</span></span><span style="display:flex;"><span>[ramiro@n01 tmp]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Vemos que já havia um job em execução, com ID 2599. Submetemos o job com comando sbatch, e o sistema informa o ID do novo job, neste caso, 2600. Para verificar se deu tudo certo, já que podem ocorrer inúmeros problemas na submissão do job, verificamos a fila de jobs, e aí vemos que o novo job está em execução, com 16 processadores.</p>
+<p>Ao verificamos a fila um certo tempo depois, temos,</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ sq
+</span></span><span style="display:flex;"><span> JOBID      USER CPUS TIME_LIMIT  TIME_LEFT ST NODELIST
+</span></span><span style="display:flex;"><span>[ramiro@zumbi ~]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>que mostra que todos os jobs em execução foram encerrados.</p>
+<p>Como os jobs no modo batch não estão conectados a um terminal, não tem telas ou teclados associados a ele, não podendo receber entradas do teclado ou imprimir nada na tela. As saídas que iriam ser impressas na tela são direcionadas automaticamente pelo slurm para um arquivo de texto, que, caso você não mude o nome padrão, é chamado &lsquo;slurm-numero_do_job.out&rsquo;, por exemplo,</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ ls slurm-2600.out 
+</span></span><span style="display:flex;"><span>slurm-2600.out
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$ cat slurm-2600.out 
+</span></span><span style="display:flex;"><span>job 2600 started running at Fri May 22 13:11:52 -03 2026
+</span></span><span style="display:flex;"><span>job 2600 started finished running  at Fri May 22 13:16:52 -03 2026
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$ 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>No arquivo de submissão, as linhas com comentários que começam com &lsquo;#SBATCH&rsquo; são interpretadas pelo slurm como opções dados ao comando na linha de comando. Por exemplo, o arquivo abaixo</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;job </span>$SLURM_JOB_ID<span style="color:#e6db74"> started running at </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>/usr/bin/sleep <span style="color:#ae81ff">300</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;job </span>$SLURM_JOB_ID<span style="color:#e6db74"> started finished running  at </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>se salvo com o nome &lsquo;batch_02.sh&rsquo;, poderia ser submetido com o comando</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi ~]$ sbatch --ntasks<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> --cpus-per-task<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span> --time<span style="color:#f92672">=</span>12:00:00 batch_02.sh
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>e o efeito teria sido exatamente o mesmo. Você pode combinar os dois tipos de opção, mas se você especificar a mesma opção com valores diferentes na linha de comando e como comentário no arquivo de submissão, o valor na linha de comando tem preferência.</p>
+<h2>Opção <code>--time</code><span class="hx:absolute hx:-mt-20" id="opção---time"></span>
+    <a href="#op%c3%a7%c3%a3o---time" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Um dos recursos mais importantes gerenciados pelo slurm é o tempo de execução do job. Todo o processo submetido tem um tempo limite. Caso você não especifique este tempo, o sistema atribui automaticamente o tempo limite de 2 horas.</p>
+<p>Quando o job excede o seu tempo limite, com uma pequena tolerância, o job é terminado pelo slurm, forçosamente, sem a menor preocupação com salvamento de arquivos, em qual etapa o job está, nada. A priori parece uma boa ideia então pedir tempos de execução limites exageradamente longos, para não correr o risco de ter um processo interrompido antes de seu fim normal. Isto não é uma boa ideia, no entanto, porque o slurm pode &ldquo;furar a fila&rdquo;, passando um job que está esperando recursos na frente de um outro que também está esperando recursos, se ele for muito mais rápido do que aquele que está a sua frente.</p>
+<p>O ideal então é você pedir o um tempo limite apertado, mas com alguma folga. É óbvio que nas primeiras vezes que você executa um programa novo com dados novos em uma configuração nova, esta estimativa é difícil, mas com o tempo e experiência você consegue chegar a valores razoáveis. Na dúvida, é melhor pecar por excesso. Se a fila do cluster está muito vazia, isto realmente não faz diferença.</p>
+<p>A sintaxe desta opção é na média, <code>--time=DD-HH:MM:SS</code>, onde DD são dias, HH hora, MM minutos e SS segundos, mas há muitas variações possíveis. Por favor veja o help de qualquer um dos comandos de submissão.</p>
+<h1><code>scancel</code></h1><p>Somos todos humanos e às vezes cometemos erros. Você pode interromper um job que está executando, desde que você tenha permissão para isto, com  <a href="https://slurm.schedmd.com/scancel.html"target="_blank" rel="noopener"><code>scancel</code></a>. O uso básico é óbvio e imediato. Vamos submeter um job e examinar a fila.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ sbatch batch_01.sh
+</span></span><span style="display:flex;"><span>Submitted batch job 2642
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$ sq
+</span></span><span style="display:flex;"><span> JOBID      USER CPUS TIME_LIMIT  TIME_LEFT ST NODELIST
+</span></span><span style="display:flex;"><span>  2642    ramiro   16   12:00:00   11:59:46  R n01
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Vamos cancelar o job 2642, e rapidamente examinar a fila novamente.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ scancel <span style="color:#ae81ff">2642</span>
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$ sq
+</span></span><span style="display:flex;"><span> JOBID      USER CPUS TIME_LIMIT  TIME_LEFT ST NODELIST
+</span></span><span style="display:flex;"><span>  2642    ramiro   16   12:00:00   11:59:37 CG n01
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Notem que estado do job mudou de &lsquo;R&rsquo; para &lsquo;CG&rsquo;, o que significa que o job terminou e o sistema está sendo limpo.  Pouco tempo depois, se examinarmos a fila novamente, não há mais vestígio do job.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ sq
+</span></span><span style="display:flex;"><span> JOBID      USER CPUS TIME_LIMIT  TIME_LEFT ST NODELIST
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>No entanto, o sistema registra a intervenção no arquivo de saída do job.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ cat slurm-2642.out 
+</span></span><span style="display:flex;"><span>job 2642 started running at Fri May 22 16:32:55 -03 2026
+</span></span><span style="display:flex;"><span>slurmstepd-n01: error: *** JOB 2642 ON n01 CANCELLED AT 2026-05-22T16:33:17 ***
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$ 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<h1>Job Arrays</h1><p>Alguns jobs paralelos caracterizam-se por rodar exatamente o mesmo programa com entradas diferentes. Isto ocorre, por exemplo, quando se faz alguma espécie de análise paramétrica. Neste caso o slurm tem uma funcionalidade especial, <a href="https://slurm.schedmd.com/job_array.html"target="_blank" rel="noopener">Job arrays</a></p>
+<p>Job arrays só funcionam com arquivos de submissão, usando o comando <code>sbatch</code>, portanto. Vamos examinar o arquivo de submissão a seguir,
+que está salvo sob o nome &lsquo;batch_array.sh&rsquo;</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#SBATCH --ntasks=1</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#SBATCH --cpus-per-task=1</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#SBATCH --time=1:00:00</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;job </span>$SLURM_JOB_ID<span style="color:#e6db74"> started running at </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;this is task </span>$SLURM_ARRAY_TASK_ID<span style="color:#e6db74">, running on node </span><span style="color:#66d9ef">$(</span>hostname<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>/usr/bin/sleep <span style="color:#ae81ff">120</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;task </span>$SLURM_ARRAY_TASK_ID<span style="color:#e6db74"> finished running  at </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Perceba que podemos diferenciar cada instância sendo executada com a variável de ambiente <code>$SLURM_ARRAY_TASK_ID</code>.  Você pode usar isto para fazer com que o seu programa de análise abra arquivos diferentes, numerados sequencialmente, por exemplo. A submissão de um job array é muito simples,</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ sbatch --array<span style="color:#f92672">=</span>0-40%10 batch_array.sh
+</span></span><span style="display:flex;"><span>Submitted batch job 2601
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>A opção <code>--array=0-40%10</code> indica que eu quero criar um array com 41 jobs, indexados de 0 a 40, mas com no máximo 10 instâncias executando simultaneamente. Esta última restrição é opcional, e você pode deixar o slurm gerenciar diretamente todo o array como se fossem jobs normais. Não faça isto se o seu array tem milhares de instâncias, no entanto.</p>
+<p>Vamos usar o comando <code>squeue</code> normal para ver a fila. Naquele alias que definimos anteriormente, não aparecem os detalhes do job array.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ squeue
+</span></span><span style="display:flex;"><span>             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+</span></span><span style="display:flex;"><span>   2601_[10-40%10]    normal batch_ar   ramiro PD       0:00      1 (JobArrayTaskLimit)
+</span></span><span style="display:flex;"><span>            2601_0    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_1    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_2    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_3    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_4    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_5    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_6    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_7    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_8    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>            2601_9    normal batch_ar   ramiro  R       0:18      1 n01
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Cada job agora é identificado com o número do job e o seu índice no array. Cada elemento job array vai criar um arquivo de saída separado, por padrão.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ ls
+</span></span><span style="display:flex;"><span>batch_01.sh        slurm-2601_18.out  slurm-2601_28.out  slurm-2601_38.out
+</span></span><span style="display:flex;"><span>batch_array.sh     slurm-2601_19.out  slurm-2601_29.out  slurm-2601_39.out
+</span></span><span style="display:flex;"><span>slurm-2601_0.out   slurm-2601_1.out   slurm-2601_2.out   slurm-2601_3.out
+</span></span><span style="display:flex;"><span>slurm-2601_10.out  slurm-2601_20.out  slurm-2601_30.out  slurm-2601_40.out
+</span></span><span style="display:flex;"><span>slurm-2601_11.out  slurm-2601_21.out  slurm-2601_31.out  slurm-2601_4.out
+</span></span><span style="display:flex;"><span>slurm-2601_12.out  slurm-2601_22.out  slurm-2601_32.out  slurm-2601_5.out
+</span></span><span style="display:flex;"><span>slurm-2601_13.out  slurm-2601_23.out  slurm-2601_33.out  slurm-2601_6.out
+</span></span><span style="display:flex;"><span>slurm-2601_14.out  slurm-2601_24.out  slurm-2601_34.out  slurm-2601_7.out
+</span></span><span style="display:flex;"><span>slurm-2601_15.out  slurm-2601_25.out  slurm-2601_35.out  slurm-2601_8.out
+</span></span><span style="display:flex;"><span>slurm-2601_16.out  slurm-2601_26.out  slurm-2601_36.out  slurm-2601_9.out
+</span></span><span style="display:flex;"><span>slurm-2601_17.out  slurm-2601_27.out  slurm-2601_37.out
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Vamos ver alguns destes arquivos.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>[ramiro@zumbi tmp]$ more slurm-2601_35.out 
+</span></span><span style="display:flex;"><span>job 2637 started running at Fri May 22 16:00:55 -03 2026
+</span></span><span style="display:flex;"><span>this is task 35, running on node n02
+</span></span><span style="display:flex;"><span>task 35 finished running  at Fri May 22 16:02:55 -03 2026
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$ more slurm-2601_22.out 
+</span></span><span style="display:flex;"><span>job 2624 started running at Fri May 22 15:58:52 -03 2026
+</span></span><span style="display:flex;"><span>this is task 22, running on node n01
+</span></span><span style="display:flex;"><span>task 22 finished running  at Fri May 22 16:00:52 -03 2026
+</span></span><span style="display:flex;"><span>[ramiro@zumbi tmp]$
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+    aria-label="Copy code"
+    data-copied-label="Copied!"
+  >
+    <div class="hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+<div class="hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<h1>MPI</h1><p>Jobs MPI tem algumas sutilezas e merecem uma discussão <a href="../mpi">separada</a>.</p>
+
+        </div>
+        <div class="hx:mt-16"></div>
+      </main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx:bg-gray-100 hx:pb-[env(safe-area-inset-bottom)] hx:dark:bg-neutral-900 hx:print:bg-transparent"><div class="hextra-custom-footer hextra-max-footer-width hx:pl-[max(env(safe-area-inset-left),1.5rem)] hx:pr-[max(env(safe-area-inset-right),1.5rem)] hx:text-gray-600 hx:dark:text-gray-400"></div><div
+      class="hextra-max-footer-width hx:mx-auto hx:flex hx:justify-center hx:py-12 hx:pl-[max(env(safe-area-inset-left),1.5rem)] hx:pr-[max(env(safe-area-inset-right),1.5rem)] hx:text-gray-600 hx:dark:text-gray-400 hx:md:justify-start"
+    >
+      <div class="hx:flex hx:w-full hx:flex-col hx:items-center hx:sm:items-start"><div class="hx:font-semibold"><a class="hx:flex hx:text-sm hx:items-center hx:gap-1 hx:text-current" target="_blank" rel="noopener noreferrer" title="Hextra GitHub Homepage" href="https://github.com/imfing/hextra">
+    <span>Powered by Hextra<svg height=1em class="hx:inline-block hx:ltr:ml-1 hx:rtl:mr-1 hx:align-[-2.5px]" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="m 105.50024,22.224647 c -9.59169,-5.537563 -21.40871,-5.537563 -31.000093,0 L 39.054693,42.689119 C 29.463353,48.226675 23.55484,58.460531 23.55484,69.535642 v 40.928918 c 0,11.07542 5.908513,21.3092 15.499853,26.84652 l 35.445453,20.46446 c 9.591313,5.53732 21.408404,5.53732 31.000094,0 l 35.44507,-20.46446 c 9.59131,-5.53732 15.49985,-15.7711 15.49985,-26.84652 V 69.535642 c 0,-11.075111 -5.90854,-21.308967 -15.49985,-26.846523 z M 34.112797,85.737639 c -1.384445,2.397827 -1.384445,5.352099 0,7.749927 l 24.781554,42.922974 c 1.38437,2.39783 3.942853,3.87496 6.711592,3.87496 h 49.563107 c 2.76905,0 5.3273,-1.47713 6.71144,-3.87496 l 24.78194,-42.922974 c 1.38414,-2.397828 1.38414,-5.3521 0,-7.749927 L 121.88049,42.814746 c -1.38414,-2.397828 -3.94239,-3.874964 -6.71144,-3.874964 H 65.605944 c -2.768739,0 -5.327223,1.477059 -6.711592,3.874964 z" style="stroke-width:0.774993" /></svg></span>
+  </a></div></div>
+    </div></footer>
+    
+    <script defer src="/zumbi-docs/js/main.min.0d9887379b04188e63750860180304d1cd3715808ace4ad4175b98938e64faa7.js" integrity="sha256-DZiHN5sEGI5jdQhgGAME0c03FYCKzkrUF1uYk45k&#43;qc="></script>
+<script defer src="/zumbi-docs/js/flexsearch.433e941a8a573ebb9931fc16fc75266ab6b93f569ac2fb4f3dc66882e0416f4c.js" integrity="sha256-Qz6UGopXPruZMfwW/HUmara5P1aawvtPPcZoguBBb0w=" crossorigin="anonymous"></script><script defer src="/zumbi-docs/en.search.min.1c421029c8b479924cb029082882981d5c10a8b165b3a37f27ae0f66a76cdc2c.js" integrity="sha256-HEIQKci0eZJMsCkIKIKYHVwQqLFls6N/J64PZqds3Cw="></script>
+  </body>
+</html>
