@@ -3,20 +3,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/slurm/queues/</loc>
+    <loc>https://code.willmersdorf.net/zumbi-docs/public/slurm/queues/</loc>
     <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/slurm/enque/</loc>
+    <loc>https://code.willmersdorf.net/zumbi-docs/public/slurm/enque/</loc>
     <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/slurm/mpi/</loc>
+    <loc>https://code.willmersdorf.net/zumbi-docs/public/slurm/mpi/</loc>
     <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/slurm/</loc>
+    <loc>https://code.willmersdorf.net/zumbi-docs/public/slurm/</loc>
     <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/categories/</loc>
+    <loc>https://code.willmersdorf.net/zumbi-docs/public/categories/</loc>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/tags/</loc>
+    <loc>https://code.willmersdorf.net/zumbi-docs/public/tags/</loc>
   </url>
 </urlset>
