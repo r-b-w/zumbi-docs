@@ -3,20 +3,72 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/public/slurm/queues/</loc>
+    <loc>http://localhost:1313/zumbi-docs/public/slurm/queues/</loc>
     <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/public/slurm/enque/</loc>
+    <loc>http://localhost:1313/zumbi-docs/public/software/python/mamba/</loc>
     <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/public/slurm/mpi/</loc>
+    <loc>http://localhost:1313/zumbi-docs/public/software/modules/</loc>
     <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/public/slurm/</loc>
+    <loc>http://localhost:1313/zumbi-docs/public/acesso/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/tips/vscode/ssh/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/tips/vscode/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/software/spack/</loc>
     <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/public/categories/</loc>
+    <loc>http://localhost:1313/zumbi-docs/public/slurm/enque/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
   </url><url>
-    <loc>https://code.willmersdorf.net/zumbi-docs/public/tags/</loc>
+    <loc>http://localhost:1313/zumbi-docs/public/software/python/uv/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/ssh/keys/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/ssh/keys/linux/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/ssh/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/ssh/keys/windows/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/slurm/mpi/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/software/python/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/ssh/connection/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/ssh/connection/linux/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/storage/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/ssh/connection/windows/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/slurm/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/software/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/hardware/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/tips/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/localiza%C3%A7%C3%A3o/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/contato/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/</loc>
+    <lastmod>2026-03-24T18:43:16-03:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/categories/</loc>
+  </url><url>
+    <loc>http://localhost:1313/zumbi-docs/public/tags/</loc>
   </url>
 </urlset>
