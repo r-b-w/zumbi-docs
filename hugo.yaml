@@ -4,6 +4,9 @@ title: Cluster Zumbi
 module:
   imports:
     - path: github.com/imfing/hextra
+caches:
+  images:
+    dir: :cacheDir/images
 markup:
   goldmark:
     extensions:
