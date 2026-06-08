@@ -1,9 +1,11 @@
 # Generated files by hugo
-/public/
+# /public/
+/node_modules/
 /resources/_gen/
 /assets/jsconfig.json
 hugo_stats.json
-
+package-lock.json
+package.json
 # Executable may be added to repository
 hugo.exe
 hugo.darwin
