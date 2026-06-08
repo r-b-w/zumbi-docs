@@ -17,7 +17,7 @@ Existe até hoje um clone deste programa, chamado [MC](https://midnight-commande
 `<F10>` ou `<Esc-0>`.
 
 {{< figure
-src="/images/mc.png"
+src="mc.png"
 alt="Programa MC"
 caption="Programa MC"
 width="85%"
@@ -26,7 +26,7 @@ width="85%"
 Você navega pelo sistema de arquivos com as teclas de setas de direção, e pode acessar o menu superior com `<F9>`, e em seguida use as teclas de navegação para escolher um item. Use a tecla `<Tab>` para mudar de painel. O uso deste programa deveria sem bem intuitivo. Em muitos sistemas até o mouse funciona. Este programa pode ser muito útil para segurar a sua mãozinha até que você se familiarize o suficiente com os comandos do terminal. Por exemplo, veja o que você pode fazer com o menu "File"
 
 {{< figure
-src="/images/mc_file.png"
+src="mc_file.png"
 alt="Comandos de arquivos"
 caption="Comandos de arquivos"
 width="40%"
@@ -198,7 +198,7 @@ Você pode usar o Dolphin para gerenciar seus arquivos remotos, desde que, novam
 
 Abrindo uma janela do Dolphin, temos algo como o mostrado a seguir. Clique no campo no qual o diretório atual é mostrado, onde está escrito "Início", com o botão esquerdo do mouse.
 {{< figure
-src="/images/dolphin_00.png"
+src="dolphin_00.png"
 alt="Dolphin"
 caption="Dolphin"
 width="80%"
@@ -206,7 +206,7 @@ width="80%"
 
 O resultado deve ser análogo a este, onde agora você pode digitar um caminho de destino neste campo. Deve estar sendo listado o seu diretório atual, provavelmente o seu diretório raiz. Apague o diretório que estiver lá e digite "fish://ramiro@zumbi.padmec.org/home/ramiro", obviamente, trocando "ramiro" por seu nome de usuário no Zumbi. Tecle `<Enter>` com o cursor dentro deste campo ainda.
 {{< figure
-src="/images/dolphin_10.png"
+src="dolphin_10.png"
 alt="Endereço remoto"
 caption="Endereço remoto"
 width="80%"
@@ -215,7 +215,7 @@ width="80%"
 Depois de algumas maquinações, a janela deve mudar, magicamente, para mostrar os seus arquivos no Zumbi.
 
 {{< figure
-src="/images/dolphin_20.png"
+src="dolphin_20.png"
 alt="Arquivos remotos"
 caption="Arquivos remotos"
 width="80%"
@@ -223,7 +223,7 @@ width="80%"
 
 Você pode copiar e mover os arquivos desta janela para outra janela ou outra aba do Dolphin exatamente como se fossem arquivos locais. É possível também simplesmente dividir este painel e clicar em qualquer outro diretório na coluna de locais à esquerda, e fazer todas as operações na mesma janela.
 {{< figure
-src="/images/dolphin_30.png"
+src="dolphin_30.png"
 alt="Arquivos remotos e locais"
 caption="Arquivos remotos e locais"
 width="80%"

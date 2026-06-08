@@ -14,7 +14,7 @@ Em primeiro lugar você precisa [descarregar o programa](https://dl.bitvise.com/
 src="install_options.png"
 alt="Opções de instalação"
 caption="Opções de instalação"
-width="80%"
+width="60%"
 >}}
 
 Caso você tenha desmarcado "Run BitVise SSH Client when done" na etapa anterior, procure o programa na busca de programas do Windows e dê partida nele. Deve aparecer a janela abaixo. Selecione "Client key manager", que está marcado nesta figura.
@@ -23,7 +23,7 @@ Caso você tenha desmarcado "Run BitVise SSH Client when done" na etapa anterior
 src="start_window.png"
 alt="Janela inicial"
 caption="Janela inicial"
-width="100%"
+width="80%"
 >}}
 
 Deve aparecer a janela a seguir, onde você não deve ter nenhum par listado. Vamos gerar um par clicando no botão "Generate New", como indicado.
@@ -32,7 +32,7 @@ Deve aparecer a janela a seguir, onde você não deve ter nenhum par listado. Va
 src="generate_new.png"
 alt="Gerenciador de chaves"
 caption="Gerenciador de chaves"
-width="100%"
+width="80%"
 >}}
 
 Aparece então a janela na qual você escolhe parâmetros para o seu par de chaves. Não é estritamente necessário, mas, por uniformidade e para facilitar a minha vida, vamos mudar o algoritmo padrão, RSA, para ED25519, selecionando a opção no dropbox, como mostrado a seguir.
@@ -43,7 +43,7 @@ Antes de gerar as chaves **certifique-se** que você escolheu uma frase secreta,
 src="key_parameters.png"
 alt="Parâmetros do par de chaves"
 caption="Parâmetros do par de chaves"
-width="100%"
+width="60%"
 >}}
 
 Então, **após** ter entrado com a sua frase secreta, duas vezes, clique em "Generate".
@@ -61,7 +61,7 @@ Após um curto intervalo deve aparecer uma janela como a mostrada a seguir, com 
 src="generate_result.png"
 alt="Resultado da geração"
 caption="Resultado da geração"
-width="100%"
+width="80%"
 >}}
 
 Exportamos a chave pública clicando em "Export", o que fará surgir a janela abaixo. Escolha "OpenSSH format". **Não** exporte a chave privada.
@@ -79,7 +79,7 @@ Vai aparecer então uma janela na qual você escolher o arquivo de destino no qu
 src="save_public_key.png"
 alt="Arquivo de destino"
 caption="Arquivo de destino"
-width="100%"
+width="80%"
 >}}
 
 Pronto, você pode fechar todas as janelas do cliente BitVise, você só vai precisar dele novamente quando for acessar o sistema via terminal, ou para transferir arquivos. Ou muitas outras coisas.

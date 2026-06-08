@@ -144,7 +144,3 @@ width="90%"
 >}}
 
 O que você editar nesta janela será feito no sistema de arquivos do Zumbi. Você pode mandar o explorar de arquivos do VS Code abrir a sua pasta raiz, e depois de confirmar que confia em tudo, terá acesso a todos os seus arquivos.
-
-# scp
-
-#  rsync
