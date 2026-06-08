@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: 'Secure Shell'
 weight: 20
 cascade:

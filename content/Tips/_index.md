@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: 'Dicas'
 weight: 50
 cascade:

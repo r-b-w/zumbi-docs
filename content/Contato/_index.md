@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: 'Contato'
 weight: 100
 cascade:

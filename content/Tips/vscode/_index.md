@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: 'VS Code acesso remoto'
 weight: 10
 cascade:

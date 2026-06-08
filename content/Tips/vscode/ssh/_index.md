@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: 'Cliente nativo'
 weight: 10
 cascade:

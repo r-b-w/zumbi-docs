@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: 'Storage'
 weight: 30
 cascade:

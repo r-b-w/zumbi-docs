@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: 'Linux'
 weight: 30
 cascade:

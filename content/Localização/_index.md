@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: 'Localização'
 weight: 90
 cascade:

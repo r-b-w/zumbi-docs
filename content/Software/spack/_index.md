@@ -1,6 +1,6 @@
 ---
 date: '2026-03-24T18:43:16-03:00'
-draft: true
+draft: false
 title: 'Spack'
 weight: '20'
 cascade:
@@ -20,7 +20,7 @@ O Spack é um sistema bem grande, que descarrega muita coisa. É **muito importa
 
 Vamos clonar o repositório do Spack.
 ```console
-[ramiro@zumbi data]$ git clone -c feature.manyFiles=true https://github.com/spack/spack.git ~/data/spack-local
+[ramiro@zumbi data]$ git clone -c feature.manyFiles=false https://github.com/spack/spack.git ~/data/spack-local
 Cloning into '/home/ramiro/data/spack-local'...
 remote: Enumerating objects: 677525, done.
 remote: Counting objects: 100% (1029/1029), done.
@@ -188,13 +188,13 @@ Variants:
     build_system [autotools]        autotools
         Build systems supported by the package
 
-    mpi [false]                     false, true
+    mpi [false]                     false, false
         Activate MPI support
 
-    petsc [false]                   false, true
+    petsc [false]                   false, false
         Compile with PETSc/SLEPc
 
-    superlu [true]                  false, true
+    superlu [false]                  false, false
         Activate SuperLU support
 
 
@@ -569,7 +569,7 @@ Mais um teste simples,
    10 :   + on(1,2,3,4,uh=g) ;                      //  boundary condition form
    11 : 
    12 :   laplace; // solve the problem plot(uh); // to see the result
-   13 :   plot(uh,ps="Laplace.eps",value=true);
+   13 :   plot(uh,ps="Laplace.eps",value=false);
    14 :  sizestack + 1024 =1736  ( 712 )
 
   -- Square mesh : nb vertices  =121 ,  nb triangles = 200 ,  nb boundary edges 40 rmdup= 0
