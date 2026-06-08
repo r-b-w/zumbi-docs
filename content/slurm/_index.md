@@ -38,7 +38,7 @@ Nos modelos de computação que vamos discutir aqui, os processos são executada
 No modelo de memória compartilhada, existe apenas um único espaço global de memória, e todas os processos tem acesso direto, para leitura e escrita, a qualquer endereço no espaço global de memória, como esquematizado abaixo. Nesta figura os vários processos estão sendo representados por \( T_i, i=1,\ldots,n\).
 
 {{< figure
-src="/images/shared_mem.svg"
+src="shared_mem.svg"
 alt="Modelo de memória compartilhada"
 caption="Memória compartilhada"
 width="75%"
@@ -53,7 +53,7 @@ Um programa de memória compartilhada pode ser escrito usando [Posix Threads](ht
 No modelo de memória distribuída, cada processo acessa apenas um espaço de memória local, completamente isolado e separado dos outros processos. A troca de informações entre processos, necessária para execução de programas paralelos, deve ser feita através da troca de mensagens, geralmente de forma explícita e geralmente controladas diretamente pelo programador. Este modelo está representado esquematicamente abaixo.
 
 {{< figure
-src="/images/dist_mem.svg"
+src="dist_mem.svg"
 alt="Modelo de memória distribuída"
 caption="Memória distribuída"
 width="75%"
@@ -66,7 +66,7 @@ Um programa de memória distribuída usualmente é escrito usando uma biblioteca
 É possível desenvolver um programa paralelo usando um modelo híbrido, combinando os modelos de memória compartilhada e distribuída, onde os processos são organizados em grupos, nos quais os processos de cada grupo acessam diretamente um espaço de memória compartilhado, os grupos só podem trocar informações através da troca de mensagens.
 
 {{< figure
-src="/images/hibr_mem.svg"
+src="hybr_mem.svg"
 alt="Modelo de memória híbrida"
 caption="Memória híbrida"
 width="75%"
