@@ -11,14 +11,14 @@ O Zumbi só pode ser acessado remotamente, via internet. Caso você deseje acess
 Por segurança, a conexão do seu computador ao Zumbi é feita com o protocolo [Secure Shell](https://www.ssh.com/academy/ssh), conhecido popularmente com ssh. Se você nunca usou este protocolo, você encontrará algumas novidades um pouco exotéricas, mas vamos tentar ajudá-lo a colocar isto para funcionar. Conceitualmente, o acesso ao Zumbi é feito como mostrado abaixo.
 
 {{< figure
-src="/images/internal_connection.svg"
+src="internal_connection.svg"
 alt="Acesso via rede interna da UFPE"
 caption="Acesso via rede interna da UFPE"
 width="85%"
 >}}
 
 {{< figure
-src="/images/vpn_connection.svg"
+src="vpn_connection.svg"
 alt="Acesso via VPN"
 caption="Acesso via VPN"
 width="85%"
