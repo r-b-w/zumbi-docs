@@ -10,7 +10,7 @@ Vamos supor que você já configurou o [BitVise clienti](ssh/keys/windows). Prec
 
 Abra o BitVise client e escolha o gerenciador de chaves.
 {{< figure
-src="/images/bv_key_manager.png"
+src="bv_key_manager.png"
 alt="Cliente ssh BitVise"
 caption="Cliente ssh BitVise"
 width="60%"
@@ -19,7 +19,7 @@ width="60%"
 Na janela do gerenciador de chaves, escolha a que você usou para exportar a chave pública que foi  usada para abrir sua conta no Zumbi. Os números que vão aparecer na sua janela *tem que ser* completamente diferentes daqueles mostrados aqui! Não se preocupe com isto! Clique na setinha ao lado de "Export".
 
 {{< figure
-src="/images/bv_zumbi_key.png"
+src="bv_zumbi_key.png"
 alt="Escolha do par de chaves"
 caption="Escolha do par de chaves"
 width="80%"
@@ -28,7 +28,7 @@ width="80%"
 
 Escolha as opções mostradas "Export private key" e "OpenSSH format", depois clique em "Export".
 {{< figure
-src="/images/bv_priv_key.png"
+src="bv_priv_key.png"
 alt="Exportar chave privada"
 caption="Exportar chave privada"
 width="60%"
@@ -36,7 +36,7 @@ width="60%"
 
 Um painel de opções para a frase de segurança aparece. Digite a frase de segurança no campo indicado, deixe marcado "Export using existing passphrase" e clique em "Continue".
 {{< figure
-src="/images/bv_passp.png"
+src="bv_passp.png"
 alt="Frase de segurança"
 caption="Frase de segurança"
 width="60%"
@@ -45,7 +45,7 @@ width="60%"
 Será aberta uma janela de gerenciamento de aquivos onde você deve escolher o destino da chave privada. É *muito importante* que você tenha sua janela configurada para exibir arquivos ocultos, que começam com um ponto, caso contrário você nunca vai encontrar o diretório no qual deve salvar a chave. Estamos usando o diretório de configuração do ssh do seu usuário, que tipicamente é "C:\Usuários\ramir\.ssh", onde "ramir" é o nome do meu usuário neste computador. Sim digitei errado e fiquei com preguiça de arrumar depois. Eu escolhi o nome  "zumbi_priv_key", você pode usar o que quiser.
 
 {{< figure
-src="/images/bv_save_key.png"
+src="bv_save_key.png"
 alt="Arquivo de destino"
 caption="Arquivo de destino"
 width="80%"

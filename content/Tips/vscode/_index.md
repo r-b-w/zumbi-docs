@@ -12,7 +12,7 @@ Você deve ter instalado o VS Code no computador que você usa para acessar o Zu
 Abra o VS Code e clique no Gerenciador de Extensões, ou clique `<Ctrl-Shift-x>`.
 
 {{< figure
-src="/images/vscode_extension.png"
+src="vscode_extension.png"
 alt="VS Code extensions"
 caption="VS Code extensions"
 width="60%"
@@ -25,7 +25,7 @@ Está longe de ser a pior ideia do mundo abrir o gerenciador de extensões novam
 Clique no ícone indicado abaixo para iniciar uma nova conexão remota. O sua barra do VS Code deve ser bem diferente da minha, dependendo do que você tenha instalado, então procure por aquele ícone especificamente.
 
 {{< figure
-src="/images/vscode_open_connection.png"
+src="vscode_open_connection.png"
 alt="Nova conexão"
 caption="Nova conexão"
 width="60%"
@@ -34,7 +34,7 @@ width="60%"
 Depois de clicar no ícone, vai aparecer o painel mostrado a seguir, no qual você deve selecionar "Connect to Host". No meu caso já aparecem vários hosts configurados, pois eu já tenho um arquivo de configuração para o ssh. No seu caso, muito provavelmente, não há nenhum.
 
 {{< figure
-src="/images/vscode_connect_to_host.png"
+src="vscode_connect_to_host.png"
 alt="Requisitar conexão remota"
 caption="Requisitar conexão remota"
 width="60%"
@@ -43,7 +43,7 @@ width="60%"
 Vai aparecer um painel no qual você deve escolher "Adicionar Novo Host SSH"
 
 {{< figure
-src="/images/vscode_new_host.png"
+src="vscode_new_host.png"
 alt="Adicionar novo host"
 caption="Adicionar novo host"
 width="60%"
@@ -55,7 +55,7 @@ Aqui vale a pena dividir temporariamente em duas trilhas separadas, para o Windo
 No campo de entrada que aparece, digite o comando que você para conectar via ssh no Zumbi.
 
 {{< figure
-src="/images/ssh_conn_win.png"
+src="ssh_conn_win.png"
 alt="Configuração do novo host"
 caption="Configuração do novo host"
 width="90%"
@@ -71,7 +71,7 @@ Note que usamos as barras do Linux e não do Windows, mesmo estando no Windows. 
 Um painel que pergunta qual arquivo de configuração do ssh que deve ser atualizado aparece. Escolha o que corresponde ao seu usuário, trocando "ramir" pelo seu nome de usuário no Windows. O arquivo vai ser modificado, pense bem no que você está fazendo. Acione a tecla  `<Enter>`
 
 {{< figure
-src="/images/vscode_win_config.png"
+src="vscode_win_config.png"
 alt="Arquivo de configuração ssh"
 caption="Arquivo de configuração ssh"
 width="90%"
@@ -80,7 +80,7 @@ width="90%"
 Se tudo der certo, um painel com a mensagem "Host Adicionado" será mostrado brevemente. Foi muito rápido e eu não consegui capturar. Agora você pode novamente clicar no ícone de conexão remota, selecional novamente "Connect to Host", e deve aparecer um painel com "zumbi.padmec.org". Clique nesta opção.
 
 {{< figure
-src="/images/vscode_ssh_zumbi.png"
+src="vscode_ssh_zumbi.png"
 alt="Host Zumbi"
 caption="Host Zumbi"
 width="90%"
@@ -89,7 +89,7 @@ width="90%"
 Muitas coisas vão acontecer, coisas vão ser descarregadas, mas, se tudo der certo, uma nova janela do VS Code vai ser aberta, com um painel que pergunta a sua frase secreta (isto pode não acontecer se você já tiver o ssh-agent sendo executado). Informe frase secreta e tecle `<Enter>`
 
 {{< figure
-src="/images/vscode_enter_pf.png"
+src="vscode_enter_pf.png"
 alt="Frase secreta"
 caption="Frase secreta"
 width="90%"
@@ -97,7 +97,7 @@ width="90%"
 
 Quando você conseguir entrar com a sua frase secreta corretamente, a conexão será estabelecida, como indicado no canto inferior esquerdo do VS Code.
 {{< figure
-src="/images/vscode_stab_connect.png"
+src="vscode_stab_connect.png"
 alt="Conexão estabelecida"
 caption="Conexão estabelecida"
 width="90%"
@@ -111,7 +111,7 @@ No campo de entrada que aparece, digite o comando que você para conectar via ss
 No meu caso o comando é muito simples, pode ser mais sofisticado no seu. Esta parte é mais simples do que para Windows, pois, em princípio, já temos isto configurado corretamente [anteriormente](/ssh/connection). Após configurar o comando, digite `<Enter>`.
 
 {{< figure
-src="/images/vscode_ssh_cmd.png"
+src="vscode_ssh_cmd.png"
 alt="Configuração do novo host"
 caption="Configuração do novo host"
 width="90%"
@@ -120,7 +120,7 @@ width="90%"
 
 Um painel que pergunta qual arquivo de configuração do ssh que deve ser atualizado aparece. Escolha o que corresponde ao seu usuário. O arquivo vai ser modificado, pense bem no que você está fazendo. Digite `<Enter>`
 {{< figure
-src="/images/vscode_ssh_config.png"
+src="vscode_ssh_config.png"
 alt="Arquivo de configuração ssh"
 caption="Arquivo de configuração ssh"
 width="90%"
@@ -128,7 +128,7 @@ width="90%"
 
 Se tudo der certo, um painel com a mensagem "Host Adicionado" será mostrado brevemente. Foi muito rápido e eu não consegui capturar. Agora você pode novamente clicar no ícone de conexão remota, selecional novamente "Connect to Host", e deve aparecer um painel com "zumbi.padmec.org". Selecione esta opção e digite enter.
 {{< figure
-src="/images/vscode_ssh_zumbi.png"
+src="vscode_ssh_zumbi.png"
 alt="Host Zumbi"
 caption="Host Zumbi"
 width="60%"
@@ -137,7 +137,7 @@ width="60%"
 Se o seu ssh estiver configurado para conexão sem senha, então muitas coisas vão acontecer, muitas mensagens vão impressas, muitas coisas vão ser descarregadas, mas uma hora vai aparecer uma nova janela do VS Code. Esta janela está conectada ao computador remoto conforme indicado no canto inferior esquerdo da nova janela do VS Code.
 
 {{< figure
-src="/images/vscode_stab_connect.png"
+src="vscode_stab_connect.png"
 alt="Conexão estabelecida"
 caption="Conexão estabelecida"
 width="90%"
