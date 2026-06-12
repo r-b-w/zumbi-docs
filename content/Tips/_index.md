@@ -245,9 +245,9 @@ export PATH=${PATH}:/opt/local/bin
 caso não exista em lugar nenhum. Depois saia e volte ao sistema. Aí, basta executar o comando `micro` na linha de comando, você verá a janela abaixo. Conforme mostrado na linha de status do editor, digite `<Alt-g>` para ver as atribuições padrão das teclas e `<Ctrl-g>` para acessar a ajuda do editor.
 {{< figure
 src="micro_10.png"
-alt="Arquivos remotos e locais"
-caption="Arquivos remotos e locais"
-width="70%"
+alt="Editor micro"
+caption="Editor micro"
+width="80%"
 >}}
 
 
