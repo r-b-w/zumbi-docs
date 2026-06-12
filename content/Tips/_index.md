@@ -231,3 +231,24 @@ width="80%"
 
 Eu mudei um pouco a apresentação dos ícones para caber mais informação na janela. Basta agora clicar e arrastar um ícone de uma janela para a outra para movê-lo ou copiá-lo. Você também pode clicar em um arquivo remoto e abri-lo com um editor local, como o Kate, por exemplo, que é um editor de programação decente. Eu tenho quase certeza que o arquivo é copiado de um sistema para o outro para a edição, e de volta quando você o salva, então isto não é muito eficiente. Eu recomendo usar o [VS Code](vscode).
 
+# tmux
+
+Uma das ferramentas mais importante quando se trabalha remotamente usando o terminal é [`tmux`](https://github.com/tmux/tmux/wiki). O `tmux` é um multiplexador de terminais, que permite que você rode vários programas interativos simultaneamente no mesmo terminal, mantém os programas em execução **mesmo quando a conexão de internet é quebrada**, abre várias janelas no mesmo terminal, permite interromper uma sessão e voltar a ela, mesmo a partir de um computador diferente e outras coisas. É um programa fantástico e você tem muito a lucrar [aprendendo a usá-lo](https://github.com/tmux/tmux/wiki/Getting-Started) corretamente.
+
+Vamos ver algumas das funcionalidades básicas, para abrir o seu apetite. Vamos usar [outra página](tmux) para não deixar esta aqui ridiculamente longa.
+
+# micro 
+Se você não deseja usar o editor simples do `mc`, e tem motivos para evitar o VS Code, pode tentar usar um novo editor de texto que tem se tornado popular recentemente, o [micro](https://micro-editor.github.io/). Certifique-se de ter o caminho "/opt/local/bin" na sua variável de ambiente PATH, isto é, em algum lugar do seu arquivo "${HOME}/.bashrc" coloque a linha
+```bash 
+export PATH=${PATH}:/opt/local/bin
+```
+caso não exista em lugar nenhum. Depois saia e volte ao sistema. Aí, basta executar o comando `micro` na linha de comando, você verá a janela abaixo. Conforme mostrado na linha de status do editor, digite `<Alt-g>` para ver as atribuições padrão das teclas e `<Ctrl-g>` para acessar a ajuda do editor.
+{{< figure
+src="micro_10.png"
+alt="Arquivos remotos e locais"
+caption="Arquivos remotos e locais"
+width="70%"
+>}}
+
+
+
